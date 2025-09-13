@@ -2,8 +2,8 @@ import { Typography, Box } from '@mui/material';
 
 const MealPlanner = () => {
   return (
-    <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
         Meal Planner
       </Typography>
       <Typography variant="body1" color="text.secondary">

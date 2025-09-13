@@ -1,7 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { RecipeProvider } from './context/RecipeContext';
 import Layout from './components/Layout';
-import Home from './pages/Home';
 import Recipes from './pages/Recipes';
 import MealPlanner from './pages/MealPlanner';
 import GroceryList from './pages/GroceryList';
@@ -13,7 +12,7 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Navigate to="/recipes" replace />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/meal-planner" element={<MealPlanner />} />
             <Route path="/grocery-list" element={<GroceryList />} />

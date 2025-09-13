@@ -9,27 +9,26 @@ const RecipeCard = ({ recipe, onViewDetails, onAddToMealPlan }) => {
   return (
     <Card 
       sx={{ 
-        maxWidth: 345, 
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s ease-in-out',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 4
+          transform: 'translateY(-2px)',
+          boxShadow: 2
         }
       }}
     >
       <CardMedia
         component="img"
-        height="200"
+        height="140"
         image={recipe.imageUrl}
         alt={recipe.name}
         sx={{ objectFit: 'cover' }}
       />
       
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h6" component="h2" noWrap>
+        <Typography gutterBottom variant="subtitle1" component="h2" noWrap>
           {recipe.name}
         </Typography>
         
@@ -37,74 +36,78 @@ const RecipeCard = ({ recipe, onViewDetails, onAddToMealPlan }) => {
           variant="body2" 
           color="text.secondary" 
           sx={{ 
-            mb: 2,
+            mb: 1,
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 1,
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            fontSize: '0.75rem'
           }}
         >
           {recipe.description}
         </Typography>
 
         {/* Recipe info */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <AccessTime fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="caption" color="text.secondary">
               {formatTime(totalTime)}
             </Typography>
           </Box>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <People fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="caption" color="text.secondary">
               {recipe.servings}
             </Typography>
           </Box>
         </Box>
 
         {/* Difficulty and tags */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 0.5, mb: 1, flexWrap: 'wrap' }}>
           <Chip
             label={recipe.difficulty}
             size="small"
             color={difficultyColor === 'green' ? 'success' : difficultyColor === 'orange' ? 'warning' : 'error'}
             variant="outlined"
+            sx={{ fontSize: '0.7rem', height: 20 }}
           />
           
-          {recipe.tags.slice(0, 2).map((tag) => (
+          {recipe.tags.slice(0, 1).map((tag) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
               variant="outlined"
               color="primary"
+              sx={{ fontSize: '0.7rem', height: 20 }}
             />
           ))}
         </Box>
 
         {/* Nutrition info */}
         {recipe.nutrition && (
-          <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-            <Typography variant="body2" color="text.secondary">
+          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+            <Typography variant="caption" color="text.secondary">
               {recipe.nutrition.calories} cal
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="caption" color="text.secondary">
               {recipe.nutrition.protein}g protein
             </Typography>
           </Box>
         )}
       </CardContent>
 
-      <CardActions sx={{ p: 2, pt: 0 }}>
+      <CardActions sx={{ p: 1, pt: 0, flexDirection: 'column', gap: 1 }}>
         <Button 
           size="small" 
           onClick={() => onViewDetails(recipe)}
           variant="outlined"
           fullWidth
+          sx={{ fontSize: '0.75rem', py: 0.5 }}
         >
-          View Recipe
+          View
         </Button>
         <Button 
           size="small" 
@@ -112,6 +115,7 @@ const RecipeCard = ({ recipe, onViewDetails, onAddToMealPlan }) => {
           variant="contained"
           startIcon={<Restaurant />}
           fullWidth
+          sx={{ fontSize: '0.75rem', py: 0.5 }}
         >
           Add to Plan
         </Button>

@@ -60,67 +60,64 @@ const RecipeList = ({
   return (
     <Box>
       {/* Search and Filter Bar */}
-      <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          {/* Search */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              placeholder="Search recipes, ingredients..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'action.active' }} />
-              }}
-              variant="outlined"
-              size="small"
-            />
-          </Grid>
+      <Box sx={{ mb: 2 }}>
+        {/* Search */}
+        <TextField
+          fullWidth
+          placeholder="Search recipes, ingredients..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          InputProps={{
+            startAdornment: <Search sx={{ mr: 1, color: 'action.active' }} />
+          }}
+          variant="outlined"
+          size="small"
+          sx={{ mb: 2 }}
+        />
 
-          {/* Sort */}
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Sort by</InputLabel>
-              <Select
-                value={sortBy}
-                label="Sort by"
-                onChange={(e) => onSortChange(e.target.value)}
-              >
-                {sortOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+        {/* Sort and Filter Row */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+            <InputLabel>Sort by</InputLabel>
+            <Select
+              value={sortBy}
+              label="Sort by"
+              onChange={(e) => onSortChange(e.target.value)}
+            >
+              {sortOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          {/* Filter Tags */}
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Filter by tags</InputLabel>
-              <Select
-                multiple
-                value={filterTags}
-                onChange={(e) => onFilterChange(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-                input={<OutlinedInput label="Filter by tags" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {availableTags.map((tag) => (
-                  <MenuItem key={tag} value={tag}>
-                    {tag}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
+          <FormControl size="small" sx={{ minWidth: 120, flex: 1 }}>
+            <InputLabel>Filter</InputLabel>
+            <Select
+              multiple
+              value={filterTags}
+              onChange={(e) => onFilterChange(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
+              input={<OutlinedInput label="Filter" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.slice(0, 1).map((value) => (
+                    <Chip key={value} label={value} size="small" />
+                  ))}
+                  {selected.length > 1 && (
+                    <Chip label={`+${selected.length - 1}`} size="small" />
+                  )}
+                </Box>
+              )}
+            >
+              {availableTags.map((tag) => (
+                <MenuItem key={tag} value={tag}>
+                  {tag}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {/* Results count */}
@@ -139,9 +136,9 @@ const RecipeList = ({
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {recipes.map((recipe) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={recipe.id}>
+            <Grid item xs={6} sm={4} key={recipe.id}>
               <RecipeCard
                 recipe={recipe}
                 onViewDetails={onViewDetails}

@@ -35,16 +35,16 @@ const Recipes = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
           Recipes
         </Typography>
         <Fab 
           color="primary" 
           aria-label="add recipe"
           onClick={handleAddRecipe}
-          sx={{ ml: 2 }}
+          size="medium"
         >
           <Add />
         </Fab>
