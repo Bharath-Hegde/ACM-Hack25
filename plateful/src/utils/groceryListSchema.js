@@ -205,12 +205,13 @@ export const generateGroceryListFromMealPlan = (mealPlan, recipes = []) => {
             if (typeof ingredient === 'string') {
               // Parse string format: "2 cups flour"
               const parsed = parseIngredientQuantity(ingredient);
-              quantity = parsed.quantity;
+              quantity = parseFloat(parsed.quantity) || 1;
               unit = parsed.unit;
               name = parsed.name;
             } else if (typeof ingredient === 'object' && ingredient.name) {
               // Handle object format: { name: "flour", amount: 2, unit: "cups" }
-              quantity = ingredient.amount || 1;
+              // Ensure quantity is always a number to prevent string concatenation
+              quantity = parseFloat(ingredient.amount) || 1;
               unit = ingredient.unit || 'pieces';
               name = ingredient.name;
             } else {
