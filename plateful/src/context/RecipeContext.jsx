@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { sampleRecipes } from '../utils/recipeSchema';
@@ -75,9 +75,18 @@ const recipeReducer = (state, action) => {
 // Provider component
 export const RecipeProvider = ({ children }) => {
   const [state, dispatch] = useReducer(recipeReducer, initialState);
+  const isLoadingRef = useRef(false);
 
   // Load recipes from Firebase
   const loadRecipes = async () => {
+    // Prevent concurrent calls using ref
+    if (isLoadingRef.current) {
+      console.log('loadRecipes already in progress, skipping...');
+      return;
+    }
+
+    isLoadingRef.current = true;
+
     try {
       console.log('Starting to load recipes...');
       dispatch({ type: RECIPE_ACTIONS.SET_LOADING, payload: true });
@@ -97,9 +106,11 @@ export const RecipeProvider = ({ children }) => {
         console.log('No recipes found, adding sample recipes...');
         const addedRecipes = [];
         for (const recipe of sampleRecipes) {
-          const docRef = await addDoc(collection(db, 'recipes'), recipe);
+          // Remove the hardcoded ID before uploading to Firebase
+          const { id, ...recipeWithoutId } = recipe;
+          const docRef = await addDoc(collection(db, 'recipes'), recipeWithoutId);
           console.log('Added recipe:', docRef.id);
-          addedRecipes.push({ id: docRef.id, ...recipe });
+          addedRecipes.push({ id: docRef.id, ...recipeWithoutId });
         }
         console.log('Sample recipes added, dispatching...');
         dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: addedRecipes });
@@ -113,6 +124,8 @@ export const RecipeProvider = ({ children }) => {
       // Fallback to sample recipes if Firebase fails
       dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
       dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: `Firebase error: ${error.message}. Using sample recipes.` });
+    } finally {
+      isLoadingRef.current = false;
     }
   };
 

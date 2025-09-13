@@ -53,12 +53,15 @@ const Recipes = () => {
       // Add sample recipes
       const addedRecipes = [];
       for (const recipe of sampleRecipes) {
-        const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        addedRecipes.push({ id: docRef.id, ...recipe });
+        // Remove the hardcoded ID before uploading to Firebase
+        const { id, ...recipeWithoutId } = recipe;
+        const docRef = await addDoc(collection(db, 'recipes'), recipeWithoutId);
+        addedRecipes.push({ id: docRef.id, ...recipeWithoutId });
       }
       
       console.log('Sample recipes populated:', addedRecipes.length);
-      // Reload recipes
+      // Reload recipes - this will now be handled by the context's loadRecipes
+      // which will prevent concurrent calls
       loadRecipes();
     } catch (error) {
       console.error('Error populating sample recipes:', error);
