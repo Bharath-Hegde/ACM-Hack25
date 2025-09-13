@@ -21,6 +21,7 @@ const Layout = ({ children }) => {
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
+      width: '100vw',
       height: '100vh',
       backgroundColor: '#f5f5f5'
     }}>

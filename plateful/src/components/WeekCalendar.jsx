@@ -99,7 +99,7 @@ const WeekCalendar = ({
       </Box>
 
       {/* Week Calendar Grid */}
-      <Grid container spacing={1}>
+      <Grid container spacing={1} direction='column'>
         {weekDates.map((date, index) => {
           const dayOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index];
           const dayMeals = mealPlan?.meals?.[dayOfWeek] || {};
