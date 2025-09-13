@@ -51,19 +51,9 @@ const Recipes = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-          Recipes
-        </Typography>
-        <Fab 
-          color="primary" 
-          aria-label="add recipe"
-          onClick={handleAddRecipe}
-          size="medium"
-        >
-          <Add />
-        </Fab>
-      </Box>
+      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+        Recipes
+      </Typography>
 
 
       <RecipeList
@@ -86,6 +76,21 @@ const Recipes = () => {
         onClose={() => setAddDialogOpen(false)}
         onSubmit={handleAddRecipeSubmit}
       />
+
+      {/* Floating Add Button */}
+      <Fab 
+        color="primary" 
+        aria-label="add recipe"
+        onClick={handleAddRecipe}
+        sx={{ 
+          position: 'fixed', 
+          bottom: 80, // Above bottom navigation
+          right: 16,
+          zIndex: 1000
+        }}
+      >
+        <Add />
+      </Fab>
     </Box>
   );
 };
