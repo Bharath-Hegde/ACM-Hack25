@@ -31,6 +31,7 @@ const Recipes = () => {
 
   const handleViewDetails = (recipe) => {
     navigate(`/recipes/${recipe.id}`);
+    window.scrollTo(0, 0);
   };
 
   const handleAddToMealPlan = (recipe) => {
