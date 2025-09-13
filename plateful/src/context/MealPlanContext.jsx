@@ -13,8 +13,7 @@ import {
 // Meal plan context
 const MealPlanContext = createContext();
 
-// Global tracking to prevent duplicate creation across StrictMode instances
-const globalLoadedWeeks = new Set();
+// Global tracking to prevent duplicate loading across StrictMode instances
 const globalLoadingWeeks = new Set();
 
 // Initial state
@@ -104,19 +103,13 @@ export const MealPlanProvider = ({ children }) => {
       // Check if we already have a meal plan for this week
       if (state.currentMealPlan && state.currentMealPlan.weekStartDate === weekStartString) {
         console.log(`[${callId}] Already have meal plan for this week, skipping load`);
-        return;
-      }
-      
-      // Check if we've already attempted to load this week (Global StrictMode protection)
-      if (globalLoadedWeeks.has(weekStartString)) {
-        console.log(`[${callId}] Already attempted to load this week (Global StrictMode protection), skipping`);
-        return;
+        return state.currentMealPlan;
       }
       
       // Check if we're already loading this week globally (Global race condition protection)
       if (globalLoadingWeeks.has(weekStartString)) {
         console.log(`[${callId}] Already loading this week globally, skipping duplicate call`);
-        return;
+        return state.currentMealPlan;
       }
       
       // Mark this week as being loaded globally
@@ -134,29 +127,40 @@ export const MealPlanProvider = ({ children }) => {
       const querySnapshot = await getDocs(mealPlansQuery);
       console.log(`[${callId}] 📊 Found meal plans:`, querySnapshot.docs.length);
       
+      let mealPlan;
       if (querySnapshot.empty) {
-        // Create new meal plan for this week
-        console.log(`[${callId}] ➕ Creating new meal plan for week:`, weekStartString);
-        const newMealPlan = createEmptyMealPlan(weekStartDate);
-        const docRef = await addDoc(collection(db, 'mealPlans'), newMealPlan);
-        console.log(`[${callId}] ✅ Created meal plan with ID:`, docRef.id);
-        // Use Firebase-generated ID
-        dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: { ...newMealPlan, id: docRef.id } });
+        // For testing purposes, use sample data for all weeks
+        // In production, you would create empty meal plans
+        console.log(`[${callId}] ➕ Using sample meal plan for week:`, weekStartString);
+        const sampleMealPlanCopy = { ...sampleMealPlan };
+        sampleMealPlanCopy.weekStartDate = weekStartString;
+        sampleMealPlanCopy.id = `sample_${weekStartString}`;
+        mealPlan = sampleMealPlanCopy;
+        dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: mealPlan });
+        
+        // TODO: In production, create empty meal plan and save to Firebase
+        // const newMealPlan = createEmptyMealPlan(weekStartDate);
+        // const docRef = await addDoc(collection(db, 'mealPlans'), newMealPlan);
+        // mealPlan = { ...newMealPlan, id: docRef.id };
       } else {
         // Use the first (and should be only) meal plan for this week
         const mealPlanDoc = querySnapshot.docs[0];
-        const mealPlan = { id: mealPlanDoc.id, ...mealPlanDoc.data() };
+        mealPlan = { id: mealPlanDoc.id, ...mealPlanDoc.data() };
         console.log(`[${callId}] 📥 Loaded existing meal plan:`, mealPlan.id);
         dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: mealPlan });
       }
       
-      // Mark this week as loaded globally
-      globalLoadedWeeks.add(weekStartString);
+      // Note: We don't mark weeks as globally loaded to allow loading different weeks
+      
+      // Return the loaded meal plan
+      return mealPlan;
     } catch (error) {
       console.error(`[${callId}] ❌ Error loading meal plan:`, error);
       // Fallback to sample data if Firebase fails
       console.log(`[${callId}] 🔄 Falling back to sample meal plan...`);
-      dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: sampleMealPlan });
+      const fallbackMealPlan = sampleMealPlan;
+      dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: fallbackMealPlan });
+      return fallbackMealPlan;
     } finally {
       // Clean up global loading state
       globalLoadingWeeks.delete(weekStartString);
@@ -250,9 +254,8 @@ export const MealPlanProvider = ({ children }) => {
     dispatch({ type: MEAL_PLAN_ACTIONS.SET_SELECTED_WEEK, payload: weekStartDate });
     // Clear loaded weeks when changing weeks to allow loading new week
     setLoadedWeeks(new Set());
-    // Clear global tracking for new week
+    // Clear global loading state for new week (but not loaded weeks)
     const weekStartString = weekStartDate.toISOString().split('T')[0];
-    globalLoadedWeeks.delete(weekStartString);
     globalLoadingWeeks.delete(weekStartString);
     loadMealPlan(weekStartDate);
   };
