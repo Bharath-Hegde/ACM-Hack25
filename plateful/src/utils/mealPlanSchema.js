@@ -121,17 +121,23 @@ export const getMealTypeAcrossWeek = (mealPlan, mealType) => {
 // Count meals by status
 export const countMealsByStatus = (mealPlan) => {
   const counts = {
-    [MEAL_STATUSES.PLANNED]: 0,
-    [MEAL_STATUSES.COOKED]: 0,
-    [MEAL_STATUSES.EATEN_OUT]: 0,
-    [MEAL_STATUSES.SKIP]: 0
+    homeCooked: 0,
+    eatenOut: 0,
+    skipped: 0
   };
 
   DAYS_OF_WEEK.forEach(day => {
     MEAL_TYPES.forEach(mealType => {
       const meal = mealPlan?.meals?.[day]?.[mealType];
-      if (meal && meal.recipe) {
-        counts[meal.status]++;
+      if (meal) {
+        if (meal.recipe) {
+          // Has a recipe = home-cooked meal
+          counts.homeCooked++;
+        } else if (meal.status === MEAL_STATUSES.EATEN_OUT) {
+          counts.eatenOut++;
+        } else if (meal.status === MEAL_STATUSES.SKIP) {
+          counts.skipped++;
+        }
       }
     });
   });
@@ -159,7 +165,7 @@ export const calculateHomeCookedStreak = (mealPlan) => {
     // Check if any meal was cooked at home
     const hasHomeCooked = MEAL_TYPES.some(mealType => {
       const meal = dayMeals[mealType];
-      return meal && meal.recipe && meal.status === MEAL_STATUSES.COOKED;
+      return meal && meal.recipe; // Has a recipe = home-cooked meal
     });
     
     if (hasHomeCooked) {
@@ -182,7 +188,7 @@ sampleMealPlan.meals.monday.breakfast = {
     name: 'Classic Spaghetti Carbonara',
     imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400'
   },
-  status: MEAL_STATUSES.PLANNED,
+  status: null,
   notes: 'Quick breakfast',
   plannedAt: new Date(),
   completedAt: null
@@ -194,7 +200,7 @@ sampleMealPlan.meals.tuesday.lunch = {
     name: 'Mediterranean Quinoa Bowl',
     imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400'
   },
-  status: MEAL_STATUSES.COOKED,
+  status: null,
   notes: 'Healthy lunch',
   plannedAt: new Date(),
   completedAt: new Date()
@@ -206,7 +212,7 @@ sampleMealPlan.meals.wednesday.dinner = {
     name: 'Chicken Teriyaki Stir Fry',
     imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400'
   },
-  status: MEAL_STATUSES.PLANNED,
+  status: null,
   notes: 'Family dinner',
   plannedAt: new Date(),
   completedAt: null
@@ -218,7 +224,7 @@ sampleMealPlan.meals.thursday.lunch = {
     name: 'Classic Beef Tacos',
     imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
   },
-  status: MEAL_STATUSES.PLANNED,
+  status: null,
   notes: 'Taco Tuesday',
   plannedAt: new Date(),
   completedAt: null
@@ -230,7 +236,7 @@ sampleMealPlan.meals.friday.dinner = {
     name: 'Creamy Mushroom Risotto',
     imageUrl: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400'
   },
-  status: MEAL_STATUSES.PLANNED,
+  status: null,
   notes: 'Friday night dinner',
   plannedAt: new Date(),
   completedAt: null

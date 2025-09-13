@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Box, Paper, BottomNavigation, BottomNavigationAction, Typography } from '@mui/material';
-import { Restaurant, CalendarToday, ShoppingCart } from '@mui/icons-material';
+import { Restaurant, CalendarToday, ShoppingCart, Analytics } from '@mui/icons-material';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -9,6 +9,7 @@ const Layout = ({ children }) => {
     { path: '/recipes', label: 'Recipes', icon: <Restaurant /> },
     { path: '/meal-planner', label: 'Plan', icon: <CalendarToday /> },
     { path: '/grocery-list', label: 'Grocery', icon: <ShoppingCart /> },
+    { path: '/insights', label: 'Insights', icon: <Analytics /> },
   ];
 
   const getCurrentTab = () => {

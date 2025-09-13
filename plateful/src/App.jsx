@@ -7,6 +7,7 @@ import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import MealPlanner from './pages/MealPlanner';
 import GroceryList from './pages/GroceryList';
+import Insights from './pages/Insights';
 import './App.css'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
               <Route path="/recipes/:recipeId" element={<RecipeDetail />} />
               <Route path="/meal-planner" element={<MealPlanner />} />
               <Route path="/grocery-list" element={<GroceryList />} />
+              <Route path="/insights" element={<Insights />} />
             </Routes>
             </Layout>
           </Router>
