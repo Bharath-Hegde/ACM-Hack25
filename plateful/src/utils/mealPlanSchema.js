@@ -33,8 +33,6 @@ export const MEAL_TYPES = [
 
 // Meal statuses
 export const MEAL_STATUSES = {
-  PLANNED: 'planned',
-  COOKED: 'cooked',
   EATEN_OUT: 'eaten_out',
   SKIPPED: 'skipped'
 };
@@ -67,18 +65,14 @@ export const formatMealType = (mealType) => {
 
 export const getMealStatusColor = (status) => {
   const colors = {
-    [MEAL_STATUSES.PLANNED]: 'grey',
-    [MEAL_STATUSES.COOKED]: 'green',
-    [MEAL_STATUSES.EATEN_OUT]: 'orange',
-    [MEAL_STATUSES.SKIPPED]: 'red'
+    [MEAL_STATUSES.EATEN_OUT]: 'warning',
+    [MEAL_STATUSES.SKIPPED]: 'error'
   };
-  return colors[status] || 'grey';
+  return colors[status] || 'default';
 };
 
 export const getMealStatusIcon = (status) => {
   const icons = {
-    [MEAL_STATUSES.PLANNED]: '📋',
-    [MEAL_STATUSES.COOKED]: '✅',
     [MEAL_STATUSES.EATEN_OUT]: '🍽️',
     [MEAL_STATUSES.SKIPPED]: '❌'
   };
@@ -94,7 +88,7 @@ export const createEmptyMealPlan = (weekStartDate) => {
     MEAL_TYPES.forEach(mealType => {
       meals[day][mealType] = {
         recipe: null,
-        status: MEAL_STATUSES.PLANNED,
+        status: null,
         notes: '',
         plannedAt: null,
         completedAt: null
@@ -103,8 +97,7 @@ export const createEmptyMealPlan = (weekStartDate) => {
   });
 
   return {
-    id: `mealplan_${weekStartDate.getTime()}`,
-    weekStartDate,
+    weekStartDate: weekStartDate.toISOString().split('T')[0], // Store as string for consistent querying
     meals,
     createdAt: new Date(),
     updatedAt: new Date()

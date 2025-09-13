@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { 
@@ -13,6 +13,10 @@ import {
 // Meal plan context
 const MealPlanContext = createContext();
 
+// Global tracking to prevent duplicate creation across StrictMode instances
+const globalLoadedWeeks = new Set();
+const globalLoadingWeeks = new Set();
+
 // Initial state
 const initialState = {
   currentMealPlan: null,
@@ -20,7 +24,8 @@ const initialState = {
   error: null,
   selectedWeek: getWeekStartDate(),
   selectedDay: null,
-  selectedMealType: null
+  selectedMealType: null,
+  isLoadingMealPlan: false // Add flag to prevent race conditions
 };
 
 // Action types
@@ -31,7 +36,8 @@ const MEAL_PLAN_ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   SET_SELECTED_WEEK: 'SET_SELECTED_WEEK',
   SET_SELECTED_DAY: 'SET_SELECTED_DAY',
-  SET_SELECTED_MEAL_TYPE: 'SET_SELECTED_MEAL_TYPE'
+  SET_SELECTED_MEAL_TYPE: 'SET_SELECTED_MEAL_TYPE',
+  SET_LOADING_MEAL_PLAN: 'SET_LOADING_MEAL_PLAN'
 };
 
 // Reducer
@@ -73,6 +79,9 @@ const mealPlanReducer = (state, action) => {
     case MEAL_PLAN_ACTIONS.SET_SELECTED_MEAL_TYPE:
       return { ...state, selectedMealType: action.payload };
     
+    case MEAL_PLAN_ACTIONS.SET_LOADING_MEAL_PLAN:
+      return { ...state, isLoadingMealPlan: action.payload };
+    
     default:
       return state;
   }
@@ -81,39 +90,77 @@ const mealPlanReducer = (state, action) => {
 // Provider component
 export const MealPlanProvider = ({ children }) => {
   const [state, dispatch] = useReducer(mealPlanReducer, initialState);
+  
+  // Track if we've already attempted to load this week to prevent StrictMode duplicates
+  const [loadedWeeks, setLoadedWeeks] = useState(new Set());
 
   // Load meal plan for current week
   const loadMealPlan = async (weekStartDate = state.selectedWeek) => {
+    const callId = Math.random().toString(36).substr(2, 9); // Unique call identifier
+    // Convert weekStartDate to a consistent format for comparison
+    const weekStartString = weekStartDate.toISOString().split('T')[0]; // YYYY-MM-DD format
     try {
+      
+      // Check if we already have a meal plan for this week
+      if (state.currentMealPlan && state.currentMealPlan.weekStartDate === weekStartString) {
+        console.log(`[${callId}] Already have meal plan for this week, skipping load`);
+        return;
+      }
+      
+      // Check if we've already attempted to load this week (Global StrictMode protection)
+      if (globalLoadedWeeks.has(weekStartString)) {
+        console.log(`[${callId}] Already attempted to load this week (Global StrictMode protection), skipping`);
+        return;
+      }
+      
+      // Check if we're already loading this week globally (Global race condition protection)
+      if (globalLoadingWeeks.has(weekStartString)) {
+        console.log(`[${callId}] Already loading this week globally, skipping duplicate call`);
+        return;
+      }
+      
+      // Mark this week as being loaded globally
+      globalLoadingWeeks.add(weekStartString);
+      
+      dispatch({ type: MEAL_PLAN_ACTIONS.SET_LOADING_MEAL_PLAN, payload: true });
       dispatch({ type: MEAL_PLAN_ACTIONS.SET_LOADING, payload: true });
+      console.log(`[${callId}] 🔄 Loading meal plan for week:`, weekStartString);
       
-      // For now, use sample data (skip Firebase due to connection issues)
-      console.log('Loading sample meal plan...');
-      dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: sampleMealPlan });
-      
-      // TODO: Implement Firebase loading when connection is fixed
-      /*
       const mealPlansQuery = query(
         collection(db, 'mealPlans'),
-        where('weekStartDate', '==', weekStartDate)
+        where('weekStartDate', '==', weekStartString)
       );
       
       const querySnapshot = await getDocs(mealPlansQuery);
+      console.log(`[${callId}] 📊 Found meal plans:`, querySnapshot.docs.length);
       
       if (querySnapshot.empty) {
         // Create new meal plan for this week
+        console.log(`[${callId}] ➕ Creating new meal plan for week:`, weekStartString);
         const newMealPlan = createEmptyMealPlan(weekStartDate);
         const docRef = await addDoc(collection(db, 'mealPlans'), newMealPlan);
+        console.log(`[${callId}] ✅ Created meal plan with ID:`, docRef.id);
+        // Use Firebase-generated ID
         dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: { ...newMealPlan, id: docRef.id } });
       } else {
+        // Use the first (and should be only) meal plan for this week
         const mealPlanDoc = querySnapshot.docs[0];
         const mealPlan = { id: mealPlanDoc.id, ...mealPlanDoc.data() };
+        console.log(`[${callId}] 📥 Loaded existing meal plan:`, mealPlan.id);
         dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: mealPlan });
       }
-      */
+      
+      // Mark this week as loaded globally
+      globalLoadedWeeks.add(weekStartString);
     } catch (error) {
-      console.error('Error loading meal plan:', error);
-      dispatch({ type: MEAL_PLAN_ACTIONS.SET_ERROR, payload: error.message });
+      console.error(`[${callId}] ❌ Error loading meal plan:`, error);
+      // Fallback to sample data if Firebase fails
+      console.log(`[${callId}] 🔄 Falling back to sample meal plan...`);
+      dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: sampleMealPlan });
+    } finally {
+      // Clean up global loading state
+      globalLoadingWeeks.delete(weekStartString);
+      dispatch({ type: MEAL_PLAN_ACTIONS.SET_LOADING_MEAL_PLAN, payload: false });
     }
   };
 
@@ -125,16 +172,14 @@ export const MealPlanProvider = ({ children }) => {
         payload: { dayOfWeek, mealType, mealData } 
       });
       
-      // TODO: Save to Firebase when connection is fixed
-      /*
-      if (state.currentMealPlan) {
+      // Save to Firebase
+      if (state.currentMealPlan && state.currentMealPlan.id) {
         const mealPlanRef = doc(db, 'mealPlans', state.currentMealPlan.id);
         await updateDoc(mealPlanRef, {
           [`meals.${dayOfWeek}.${mealType}`]: mealData,
           updatedAt: new Date()
         });
       }
-      */
     } catch (error) {
       console.error('Error updating meal:', error);
       dispatch({ type: MEAL_PLAN_ACTIONS.SET_ERROR, payload: error.message });
@@ -145,18 +190,21 @@ export const MealPlanProvider = ({ children }) => {
   const assignRecipeToMeal = (dayOfWeek, mealType, recipe) => {
     const mealData = {
       recipe,
-      status: MEAL_STATUSES.PLANNED,
+      status: null, // No status for recipes
       plannedAt: new Date(),
       notes: ''
     };
     updateMeal(dayOfWeek, mealType, mealData);
   };
 
-  // Update meal status
-  const updateMealStatus = (dayOfWeek, mealType, status) => {
+  // Clear meal (remove all data)
+  const clearMeal = (dayOfWeek, mealType) => {
     const mealData = {
-      status,
-      completedAt: status === MEAL_STATUSES.COOKED ? new Date() : null
+      recipe: null,
+      status: null,
+      notes: '',
+      plannedAt: null,
+      completedAt: null
     };
     updateMeal(dayOfWeek, mealType, mealData);
   };
@@ -173,9 +221,39 @@ export const MealPlanProvider = ({ children }) => {
     updateMeal(dayOfWeek, mealType, mealData);
   };
 
+  // Mark meal as eating out
+  const markMealAsEatOut = (dayOfWeek, mealType) => {
+    const mealData = {
+      recipe: null,
+      status: MEAL_STATUSES.EATEN_OUT,
+      notes: 'Eat out',
+      plannedAt: new Date(),
+      completedAt: new Date()
+    };
+    updateMeal(dayOfWeek, mealType, mealData);
+  };
+
+  // Mark meal as skipped
+  const markMealAsSkipped = (dayOfWeek, mealType) => {
+    const mealData = {
+      recipe: null,
+      status: MEAL_STATUSES.SKIPPED,
+      notes: 'Skipped this meal',
+      plannedAt: new Date(),
+      completedAt: null
+    };
+    updateMeal(dayOfWeek, mealType, mealData);
+  };
+
   // Navigation functions
   const setSelectedWeek = (weekStartDate) => {
     dispatch({ type: MEAL_PLAN_ACTIONS.SET_SELECTED_WEEK, payload: weekStartDate });
+    // Clear loaded weeks when changing weeks to allow loading new week
+    setLoadedWeeks(new Set());
+    // Clear global tracking for new week
+    const weekStartString = weekStartDate.toISOString().split('T')[0];
+    globalLoadedWeeks.delete(weekStartString);
+    globalLoadingWeeks.delete(weekStartString);
     loadMealPlan(weekStartDate);
   };
 
@@ -203,16 +281,19 @@ export const MealPlanProvider = ({ children }) => {
 
   // Load meal plan on mount
   useEffect(() => {
+    console.log('🚀 MealPlanProvider mounted, loading initial meal plan');
     loadMealPlan();
-  }, []);
+  }, []); // Empty dependency array is correct here - we want to load once on mount
 
   const value = {
     ...state,
     loadMealPlan,
     updateMeal,
     assignRecipeToMeal,
-    updateMealStatus,
+    clearMeal,
     removeRecipeFromMeal,
+    markMealAsEatOut,
+    markMealAsSkipped,
     setSelectedWeek,
     setSelectedDay,
     setSelectedMealType,

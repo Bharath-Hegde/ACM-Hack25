@@ -1,7 +1,10 @@
 import { Typography, Box, Fab } from '@mui/material';
 import { Add } from '@mui/icons-material';
+import { useState } from 'react';
 import { useMealPlan } from '../context/MealPlanContext';
+import { useRecipes } from '../context/RecipeContext';
 import WeekCalendar from '../components/WeekCalendar';
+import MealSelectionDialog from '../components/MealSelectionDialog';
 
 const MealPlanner = () => {
   const {
@@ -11,23 +14,61 @@ const MealPlanner = () => {
     selectedWeek,
     setSelectedWeek,
     assignRecipeToMeal,
-    updateMealStatus,
+    clearMeal,
+    markMealAsEatOut,
+    markMealAsSkipped,
     getDayMeals
   } = useMealPlan();
 
+  const { recipes } = useRecipes();
+  
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedMealType, setSelectedMealType] = useState(null);
+  const [currentMeal, setCurrentMeal] = useState(null);
+
   const handleMealClick = (dayOfWeek, mealType, meal) => {
-    console.log('Meal clicked:', { dayOfWeek, mealType, meal });
-    // TODO: Open recipe selection modal
+    setSelectedDay(dayOfWeek);
+    setSelectedMealType(mealType);
+    setCurrentMeal(meal);
+    setDialogOpen(true);
   };
 
   const handleMealStatusChange = (dayOfWeek, mealType, currentStatus) => {
-    console.log('Meal status change:', { dayOfWeek, mealType, currentStatus });
-    // TODO: Open status selection modal
+    // No longer needed - status cycling removed
+    console.log('Status change clicked - this should not happen anymore');
   };
 
   const handleAddMeal = () => {
-    console.log('Add meal clicked');
-    // TODO: Open add meal modal
+    // For now, just open the dialog for Monday breakfast as an example
+    setSelectedDay('monday');
+    setSelectedMealType('breakfast');
+    setCurrentMeal(null);
+    setDialogOpen(true);
+  };
+
+  const handleSelectRecipe = (dayOfWeek, mealType, recipe) => {
+    assignRecipeToMeal(dayOfWeek, mealType, recipe);
+  };
+
+  const handleMarkEatOut = (dayOfWeek, mealType) => {
+    markMealAsEatOut(dayOfWeek, mealType);
+  };
+
+  const handleMarkSkipped = (dayOfWeek, mealType) => {
+    markMealAsSkipped(dayOfWeek, mealType);
+  };
+
+  const handleClearMeal = (dayOfWeek, mealType) => {
+    clearMeal(dayOfWeek, mealType);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedDay(null);
+    setSelectedMealType(null);
+    setCurrentMeal(null);
   };
 
   if (loading) {
@@ -48,19 +89,9 @@ const MealPlanner = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-          Meal Planner
-        </Typography>
-        <Fab 
-          color="primary" 
-          aria-label="add meal"
-          onClick={handleAddMeal}
-          size="medium"
-        >
-          <Add />
-        </Fab>
-      </Box>
+      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+        Meal Planner
+      </Typography>
 
       <WeekCalendar
         mealPlan={currentMealPlan}
@@ -69,6 +100,35 @@ const MealPlanner = () => {
         onMealClick={handleMealClick}
         onMealStatusChange={handleMealStatusChange}
       />
+
+      {/* Meal Selection Dialog */}
+      <MealSelectionDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onSelectRecipe={handleSelectRecipe}
+        onMarkEatOut={handleMarkEatOut}
+        onMarkSkipped={handleMarkSkipped}
+        onClearMeal={handleClearMeal}
+        recipes={recipes}
+        dayOfWeek={selectedDay}
+        mealType={selectedMealType}
+        currentMeal={currentMeal}
+      />
+
+      {/* Floating Add Button */}
+      <Fab 
+        color="primary" 
+        aria-label="add meal"
+        onClick={handleAddMeal}
+        sx={{ 
+          position: 'fixed', 
+          bottom: 80, // Above bottom navigation
+          right: 16,
+          zIndex: 1000
+        }}
+      >
+        <Add />
+      </Fab>
     </Box>
   );
 };
