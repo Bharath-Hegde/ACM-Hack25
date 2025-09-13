@@ -1,9 +1,11 @@
 import { Typography, Box, Fab } from '@mui/material';
 import { Add } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useRecipes } from '../context/RecipeContext';
 import RecipeList from '../components/RecipeList';
 
 const Recipes = () => {
+  const navigate = useNavigate();
   const {
     recipes,
     loading,
@@ -20,8 +22,7 @@ const Recipes = () => {
   const filteredRecipes = getFilteredRecipes();
 
   const handleViewDetails = (recipe) => {
-    console.log('View recipe details:', recipe);
-    // TODO: Open recipe detail modal/page
+    navigate(`/recipes/${recipe.id}`);
   };
 
   const handleAddToMealPlan = (recipe) => {
