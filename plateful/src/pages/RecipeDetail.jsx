@@ -134,38 +134,70 @@ const RecipeDetail = () => {
       p: { xs: 1, sm: 2 },
       boxSizing: 'border-box'
     }}>
-      {/* Header with back button */}
+      {/* Header with back button and recipe title */}
       <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        mb: 2,
+        mb: 3,
         width: '100%',
-        maxWidth: '100%'
+        maxWidth: '100%',
+        backgroundColor: 'background.paper',
+        p: 2,
+        borderRadius: 2,
+        boxShadow: 1,
+        boxSizing: 'border-box'
       }}>
-        <IconButton onClick={handleBack} sx={{ mr: 1 }}>
-          <ArrowBack />
-        </IconButton>
-        <Typography 
-          variant="h4" 
-          component="h1" 
-          sx={{ 
-            fontWeight: 'bold', 
-            flexGrow: 1,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
-            wordBreak: 'break-word'
-          }}
-        >
-          {recipe.name}
-        </Typography>
-        <IconButton onClick={handleEditRecipe} sx={{ mr: 1 }}>
-          <Edit />
-        </IconButton>
-        <IconButton onClick={handleToggleFavorite} sx={{ mr: 1 }}>
-          {isFavorite ? <Favorite color="error" /> : <FavoriteBorder />}
-        </IconButton>
-        <IconButton onClick={handleShare}>
-          <Share />
-        </IconButton>
+        {/* Back button row */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          mb: 2
+        }}>
+          <IconButton onClick={handleBack} sx={{ mr: 1 }}>
+            <ArrowBack />
+          </IconButton>
+        </Box>
+        
+        {/* Title row */}
+        <Box sx={{ 
+          mb: 2,
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 'bold', 
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+              color: 'primary.main',
+              lineHeight: 1.2,
+              wordBreak: 'break-word',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical'
+            }}
+          >
+            {recipe.name}
+          </Typography>
+        </Box>
+        
+        {/* Action buttons row */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end',
+          gap: 1
+        }}>
+          <IconButton onClick={handleEditRecipe} color="primary" size="small">
+            <Edit />
+          </IconButton>
+          <IconButton onClick={handleToggleFavorite} color="primary" size="small">
+            {isFavorite ? <Favorite color="error" /> : <FavoriteBorder />}
+          </IconButton>
+          <IconButton onClick={handleShare} color="primary" size="small">
+            <Share />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Recipe Image */}

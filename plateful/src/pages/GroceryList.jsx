@@ -71,7 +71,7 @@ const GroceryList = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
         Grocery List
       </Typography>
       
