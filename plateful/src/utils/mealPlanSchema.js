@@ -6,7 +6,7 @@ export const mealPlanSchema = {
     // Structure: { [dayOfWeek]: { [mealType]: { recipe, status, notes } } }
     // dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
     // mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
-    // status: 'planned' | 'cooked' | 'eaten_out' | 'skipped'
+    // status: 'planned' | 'cooked' | 'eaten_out' | 'skip'
   },
   createdAt: 'timestamp',
   updatedAt: 'timestamp'
@@ -34,7 +34,7 @@ export const MEAL_TYPES = [
 // Meal statuses
 export const MEAL_STATUSES = {
   EATEN_OUT: 'eaten_out',
-  SKIPPED: 'skipped'
+  SKIP: 'skip'
 };
 
 // Helper functions
@@ -66,7 +66,7 @@ export const formatMealType = (mealType) => {
 export const getMealStatusColor = (status) => {
   const colors = {
     [MEAL_STATUSES.EATEN_OUT]: 'warning',
-    [MEAL_STATUSES.SKIPPED]: 'error'
+    [MEAL_STATUSES.SKIP]: 'error'
   };
   return colors[status] || 'default';
 };
@@ -74,7 +74,7 @@ export const getMealStatusColor = (status) => {
 export const getMealStatusIcon = (status) => {
   const icons = {
     [MEAL_STATUSES.EATEN_OUT]: '🍽️',
-    [MEAL_STATUSES.SKIPPED]: '❌'
+    [MEAL_STATUSES.SKIP]: '❌'
   };
   return icons[status] || '📋';
 };
@@ -124,7 +124,7 @@ export const countMealsByStatus = (mealPlan) => {
     [MEAL_STATUSES.PLANNED]: 0,
     [MEAL_STATUSES.COOKED]: 0,
     [MEAL_STATUSES.EATEN_OUT]: 0,
-    [MEAL_STATUSES.SKIPPED]: 0
+    [MEAL_STATUSES.SKIP]: 0
   };
 
   DAYS_OF_WEEK.forEach(day => {

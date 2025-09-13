@@ -82,10 +82,10 @@ const WeekCalendar = ({
       return (
         <Box>
           <Typography variant="caption" noWrap sx={{ display: 'block', mb: 0.5 }}>
-            {meal.status === MEAL_STATUSES.EATEN_OUT ? '🍽️ Eat Out' : '❌ Skipped'}
+            {meal.status === MEAL_STATUSES.EATEN_OUT ? '🍽️ Eat Out' : '❌ Skip'}
           </Typography>
           <Chip
-            label={meal.status === MEAL_STATUSES.EATEN_OUT ? 'Eat Out' : 'Skipped'}
+            label={meal.status === MEAL_STATUSES.EATEN_OUT ? 'Eat Out' : 'Skip'}
             size="small"
             color={getMealStatusColor(meal.status)}
             sx={{ fontSize: '0.7rem', height: 20 }}

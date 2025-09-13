@@ -31,7 +31,7 @@ const MealSelectionDialog = ({
   onClose, 
   onSelectRecipe, 
   onMarkEatOut, 
-  onMarkSkipped,
+  onMarkSkip,
   onClearMeal,
   recipes = [], 
   dayOfWeek, 
@@ -49,7 +49,7 @@ const MealSelectionDialog = ({
   };
 
   const handleSkip = () => {
-    onMarkSkipped(dayOfWeek, mealType);
+    onMarkSkip(dayOfWeek, mealType);
     onClose();
   };
 
@@ -63,7 +63,7 @@ const MealSelectionDialog = ({
       [MEAL_STATUSES.PLANNED]: 'default',
       [MEAL_STATUSES.COOKED]: 'success',
       [MEAL_STATUSES.EATEN_OUT]: 'warning',
-      [MEAL_STATUSES.SKIPPED]: 'error'
+      [MEAL_STATUSES.SKIP]: 'error'
     };
     return colors[status] || 'default';
   };
@@ -73,7 +73,7 @@ const MealSelectionDialog = ({
       [MEAL_STATUSES.PLANNED]: <Restaurant />,
       [MEAL_STATUSES.COOKED]: <CheckCircle />,
       [MEAL_STATUSES.EATEN_OUT]: <RestaurantMenu />,
-      [MEAL_STATUSES.SKIPPED]: <SkipNext />
+      [MEAL_STATUSES.SKIP]: <SkipNext />
     };
     return icons[status] || <Restaurant />;
   };
@@ -128,7 +128,7 @@ const MealSelectionDialog = ({
                 ) : (
                   <CardContent sx={{ flex: 1 }}>
                     <Typography variant="h6" gutterBottom>
-                      {currentMeal.status === MEAL_STATUSES.EATEN_OUT ? '🍽️ Eat Out' : '❌ Skipped'}
+                      {currentMeal.status === MEAL_STATUSES.EATEN_OUT ? '🍽️ Eat Out' : '❌ Skip'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {currentMeal.notes}

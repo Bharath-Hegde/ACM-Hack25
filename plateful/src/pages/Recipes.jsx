@@ -1,8 +1,11 @@
-import { Typography, Box, Fab } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Typography, Box, Fab, Button } from '@mui/material';
+import { Add, Refresh } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecipes } from '../context/RecipeContext';
+import { collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { sampleRecipes } from '../utils/recipeSchema';
 import RecipeList from '../components/RecipeList';
 import AddRecipeDialog from '../components/AddRecipeDialog';
 
@@ -39,6 +42,28 @@ const Recipes = () => {
     setAddDialogOpen(true);
   };
 
+  const handlePopulateSampleRecipes = async () => {
+    try {
+      // Clear existing recipes first
+      const recipesSnapshot = await getDocs(collection(db, 'recipes'));
+      const deletePromises = recipesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // Add sample recipes
+      const addedRecipes = [];
+      for (const recipe of sampleRecipes) {
+        const docRef = await addDoc(collection(db, 'recipes'), recipe);
+        addedRecipes.push({ id: docRef.id, ...recipe });
+      }
+      
+      console.log('Sample recipes populated:', addedRecipes.length);
+      // Reload recipes
+      loadRecipes();
+    } catch (error) {
+      console.error('Error populating sample recipes:', error);
+    }
+  };
+
   const handleAddRecipeSubmit = async (recipeData) => {
     try {
       await addRecipe(recipeData);
@@ -51,10 +76,20 @@ const Recipes = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-        Recipes
-      </Typography>
-
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+          Recipes
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handlePopulateSampleRecipes}
+          size="small"
+          sx={{ mr: 1 }}
+        >
+          Add Sample Recipes
+        </Button>
+      </Box>
 
       <RecipeList
         recipes={filteredRecipes}

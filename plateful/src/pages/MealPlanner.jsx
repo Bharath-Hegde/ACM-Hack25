@@ -16,7 +16,7 @@ const MealPlanner = () => {
     assignRecipeToMeal,
     clearMeal,
     markMealAsEatOut,
-    markMealAsSkipped,
+    markMealAsSkip,
     getDayMeals
   } = useMealPlan();
 
@@ -56,8 +56,8 @@ const MealPlanner = () => {
     markMealAsEatOut(dayOfWeek, mealType);
   };
 
-  const handleMarkSkipped = (dayOfWeek, mealType) => {
-    markMealAsSkipped(dayOfWeek, mealType);
+  const handleMarkSkip = (dayOfWeek, mealType) => {
+    markMealAsSkip(dayOfWeek, mealType);
   };
 
   const handleClearMeal = (dayOfWeek, mealType) => {
@@ -107,7 +107,7 @@ const MealPlanner = () => {
         onClose={handleCloseDialog}
         onSelectRecipe={handleSelectRecipe}
         onMarkEatOut={handleMarkEatOut}
-        onMarkSkipped={handleMarkSkipped}
+        onMarkSkip={handleMarkSkip}
         onClearMeal={handleClearMeal}
         recipes={recipes}
         dayOfWeek={selectedDay}

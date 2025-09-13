@@ -233,12 +233,12 @@ export const MealPlanProvider = ({ children }) => {
     updateMeal(dayOfWeek, mealType, mealData);
   };
 
-  // Mark meal as skipped
-  const markMealAsSkipped = (dayOfWeek, mealType) => {
+  // Mark meal as skip
+  const markMealAsSkip = (dayOfWeek, mealType) => {
     const mealData = {
       recipe: null,
-      status: MEAL_STATUSES.SKIPPED,
-      notes: 'Skipped this meal',
+      status: MEAL_STATUSES.SKIP,
+      notes: 'Skip this meal',
       plannedAt: new Date(),
       completedAt: null
     };
@@ -293,7 +293,7 @@ export const MealPlanProvider = ({ children }) => {
     clearMeal,
     removeRecipeFromMeal,
     markMealAsEatOut,
-    markMealAsSkipped,
+    markMealAsSkip,
     setSelectedWeek,
     setSelectedDay,
     setSelectedMealType,
