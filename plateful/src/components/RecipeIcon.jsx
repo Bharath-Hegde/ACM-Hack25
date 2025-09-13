@@ -18,7 +18,7 @@ const RecipeIcon = ({ recipe }) => {
                 sx={{ objectFit: 'cover' }}
             />
 
-                <Typography variant="subtitle2" component="h2" position="absolute" top="0" pt="5px" px="5px" maxWidth="90px" margin="auto" color="white" bgcolor="rgba(0, 0, 0, 0.4)" noWrap>
+                <Typography variant="subtitle2" component="h2" position="absolute" top="0" pt="5px" px="5px" maxWidth="90px" margin="auto" color="white" bgcolor="rgba(0, 0, 0, 0.4)">
                     {recipe.name}
                 </Typography>
         </Card>
