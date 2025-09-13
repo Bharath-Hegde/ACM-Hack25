@@ -1,6 +1,7 @@
 import { Typography, Box } from '@mui/material';
 import { useMealPlan } from '../context/MealPlanContext';
 import MealInsightsWidget from '../components/MealInsightsWidget';
+import NutritionInsightsWidget from '../components/NutritionInsightsWidget';
 
 const Insights = () => {
   const { currentMealPlan, loading, error } = useMealPlan();
@@ -28,10 +29,14 @@ const Insights = () => {
       </Typography>
       
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Track your meal patterns and cooking habits over time.
+        Track your meal patterns and nutrition composition over time.
       </Typography>
 
-      <MealInsightsWidget />
+      {/* Scrollable insights container */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <MealInsightsWidget />
+        <NutritionInsightsWidget />
+      </Box>
     </Box>
   );
 };
