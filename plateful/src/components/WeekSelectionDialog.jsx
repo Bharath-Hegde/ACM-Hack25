@@ -23,6 +23,8 @@ const WeekSelectionDialog = ({ open, onClose, onGenerate }) => {
   const [selectedWeek, setSelectedWeek] = useState(getWeekStartDate());
   const [availableWeeks, setAvailableWeeks] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [weekStats, setWeekStats] = useState(new Map()); // Store stats for all weeks
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   // Generate list of available weeks (current week + next 3 weeks)
   useEffect(() => {
@@ -38,25 +40,54 @@ const WeekSelectionDialog = ({ open, onClose, onGenerate }) => {
     setAvailableWeeks(weeks);
   }, []);
 
+  // Load stats for all available weeks when dialog opens
+  useEffect(() => {
+    if (open && availableWeeks.length > 0) {
+      const loadAllWeeksStats = async () => {
+        setIsLoadingStats(true);
+        const statsMap = new Map();
+        
+        // Load stats for all available weeks
+        for (const weekStart of availableWeeks) {
+          const weekStartString = weekStart.toISOString().split('T')[0];
+          
+          try {
+            const mealPlan = await loadMealPlan(weekStart);
+            if (mealPlan) {
+              const stats = calculateMealPlanStats(mealPlan);
+              statsMap.set(weekStartString, stats);
+            } else {
+              // Set default stats for this week if no meal plan
+              statsMap.set(weekStartString, { totalMeals: 21, plannedMeals: 0, recipes: 0 });
+            }
+          } catch (error) {
+            console.error(`Error loading meal plan for week ${weekStartString}:`, error);
+            // Set default stats for this week
+            statsMap.set(weekStartString, { totalMeals: 21, plannedMeals: 0, recipes: 0 });
+          }
+        }
+        
+        setWeekStats(statsMap);
+        setIsLoadingStats(false);
+      };
+      
+      loadAllWeeksStats();
+    }
+  }, [open, availableWeeks]); // Removed currentMealPlan to prevent infinite loop
+
   const handleWeekSelect = (weekStart) => {
     setSelectedWeek(weekStart);
-    loadMealPlan(weekStart);
+    // Stats are already loaded when dialog opens, no need to reload
   };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      // Load the selected week's meal plan if not already loaded
-      if (!currentMealPlan || currentMealPlan.weekStartDate !== selectedWeek.toISOString().split('T')[0]) {
-        await loadMealPlan(selectedWeek);
-      }
-      
-      // Wait a bit for the meal plan to load
-      setTimeout(() => {
-        onGenerate(selectedWeek);
-        setIsGenerating(false);
-        onClose();
-      }, 500);
+      // Pass the selected week to the generation function
+      // The generation function will handle loading the meal plan
+      await onGenerate(selectedWeek);
+      setIsGenerating(false);
+      onClose();
     } catch (error) {
       console.error('Error generating grocery list:', error);
       setIsGenerating(false);
@@ -78,19 +109,14 @@ const WeekSelectionDialog = ({ open, onClose, onGenerate }) => {
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   };
 
-  const getMealPlanStats = (weekStart) => {
-    if (!currentMealPlan || currentMealPlan.weekStartDate !== weekStart.toISOString().split('T')[0]) {
-      return { totalMeals: 0, plannedMeals: 0, recipes: 0 };
-    }
-
-    let totalMeals = 0;
+  const calculateMealPlanStats = (mealPlan) => {
+    let totalMeals = 21; // Fixed total: 7 days * 3 meals
     let plannedMeals = 0;
     let recipes = 0;
 
     DAYS_OF_WEEK.forEach(day => {
       MEAL_TYPES.forEach(mealType => {
-        totalMeals++;
-        const meal = currentMealPlan.meals[day]?.[mealType];
+        const meal = mealPlan.meals[day]?.[mealType];
         if (meal && (meal.recipe || meal.status)) {
           plannedMeals++;
           if (meal.recipe) {
@@ -101,6 +127,13 @@ const WeekSelectionDialog = ({ open, onClose, onGenerate }) => {
     });
 
     return { totalMeals, plannedMeals, recipes };
+  };
+
+  const getMealPlanStats = (weekStart) => {
+    const weekStartString = weekStart.toISOString().split('T')[0];
+    
+    // Return stored stats if available, otherwise return default
+    return weekStats.get(weekStartString) || { totalMeals: 21, plannedMeals: 0, recipes: 0 };
   };
 
   const isCurrentWeek = (weekStart) => {
@@ -131,11 +164,11 @@ const WeekSelectionDialog = ({ open, onClose, onGenerate }) => {
           Ingredients will be automatically consolidated and organized by category.
         </Typography>
 
-        {loading && (
+        {(loading || isLoadingStats) && (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
             <CircularProgress size={24} />
             <Typography variant="body2" sx={{ ml: 1 }}>
-              Loading meal plans...
+              {isLoadingStats ? 'Loading week stats...' : 'Loading meal plans...'}
             </Typography>
           </Box>
         )}

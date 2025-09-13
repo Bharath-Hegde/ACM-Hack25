@@ -23,7 +23,7 @@ const GroceryList = () => {
     generateFromMealPlan
   } = useGroceryList();
 
-  const { currentMealPlan } = useMealPlan();
+  const { currentMealPlan, loadMealPlan } = useMealPlan();
   const { recipes } = useRecipes();
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -61,9 +61,15 @@ const GroceryList = () => {
     setEditingItem(null);
   };
 
-  const handleGenerateFromMealPlan = (weekStart) => {
-    if (currentMealPlan) {
-      generateFromMealPlan(currentMealPlan, recipes);
+  const handleGenerateFromMealPlan = async (weekStart) => {
+    try {
+      // Load the meal plan for the selected week first
+      const mealPlan = await loadMealPlan(weekStart);
+      if (mealPlan) {
+        generateFromMealPlan(mealPlan, recipes);
+      }
+    } catch (error) {
+      console.error('Error loading meal plan for grocery generation:', error);
     }
   };
 
