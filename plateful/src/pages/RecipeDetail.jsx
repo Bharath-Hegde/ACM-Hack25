@@ -23,18 +23,21 @@ import {
   Restaurant, 
   Share,
   Favorite,
-  FavoriteBorder
+  FavoriteBorder,
+  Edit
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRecipes } from '../context/RecipeContext';
 import { getTotalTime, getDifficultyColor, formatTime } from '../utils/recipeSchema';
 import { useState } from 'react';
+import EditRecipeDialog from '../components/EditRecipeDialog';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
   const navigate = useNavigate();
-  const { recipes, loading, error } = useRecipes();
+  const { recipes, loading, error, updateRecipe } = useRecipes();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Find the recipe by ID
   const recipe = recipes.find(r => r.id === recipeId);
@@ -65,6 +68,21 @@ const RecipeDetail = () => {
   const handleToggleFavorite = () => {
     setIsFavorite(!isFavorite);
     // TODO: Implement favorite functionality
+  };
+
+  const handleEditRecipe = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleEditRecipeSubmit = async (recipeId, recipeData) => {
+    try {
+      await updateRecipe(recipeId, recipeData);
+      console.log('Recipe updated successfully!');
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating recipe:', error);
+      // TODO: Show error toast/notification
+    }
   };
 
   if (loading) {
@@ -139,6 +157,9 @@ const RecipeDetail = () => {
         >
           {recipe.name}
         </Typography>
+        <IconButton onClick={handleEditRecipe} sx={{ mr: 1 }}>
+          <Edit />
+        </IconButton>
         <IconButton onClick={handleToggleFavorite} sx={{ mr: 1 }}>
           {isFavorite ? <Favorite color="error" /> : <FavoriteBorder />}
         </IconButton>
@@ -412,6 +433,14 @@ const RecipeDetail = () => {
           Back to Recipes
         </Button>
       </Box>
+
+      {/* Edit Recipe Dialog */}
+      <EditRecipeDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        onSubmit={handleEditRecipeSubmit}
+        recipe={recipe}
+      />
     </Box>
   );
 };
