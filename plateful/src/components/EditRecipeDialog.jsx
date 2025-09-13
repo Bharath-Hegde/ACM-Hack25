@@ -256,7 +256,7 @@ const EditRecipeDialog = ({ open, onClose, onSubmit, recipe }) => {
               </Typography>
             </Grid>
             
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ width: '100%' }}>
               <TextField
                 fullWidth
                 label="Recipe Name"
@@ -268,7 +268,7 @@ const EditRecipeDialog = ({ open, onClose, onSubmit, recipe }) => {
               />
             </Grid>
             
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ width: '100%' }}>
               <TextField
                 fullWidth
                 label="Description"
@@ -282,7 +282,7 @@ const EditRecipeDialog = ({ open, onClose, onSubmit, recipe }) => {
               />
             </Grid>
             
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ width: '100%' }}>
               <TextField
                 fullWidth
                 label="Image URL (Optional)"
@@ -293,60 +293,59 @@ const EditRecipeDialog = ({ open, onClose, onSubmit, recipe }) => {
             </Grid>
             
             {/* Time and Servings */}
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Prep Time (minutes)"
-                type="number"
-                value={formData.prepTime}
-                onChange={handleChange('prepTime')}
-                error={!!errors.prepTime}
-                helperText={errors.prepTime}
-                inputProps={{ min: 1 }}
-              />
+            <Grid item xs={6} >
+              <Box display="flex" sx={{gap: 1}}>
+                <TextField
+                  fullWidth
+                  label="Prep Time (minutes)"
+                  type="number"
+                  value={formData.prepTime}
+                  onChange={handleChange('prepTime')}
+                  error={!!errors.prepTime}
+                  helperText={errors.prepTime}
+                  inputProps={{ min: 1 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Cook Time (minutes)"
+                  type="number"
+                  value={formData.cookTime}
+                  onChange={handleChange('cookTime')}
+                  error={!!errors.cookTime}
+                  helperText={errors.cookTime}
+                  inputProps={{ min: 1 }}
+                />
+              </Box>
             </Grid>
             
             <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Cook Time (minutes)"
-                type="number"
-                value={formData.cookTime}
-                onChange={handleChange('cookTime')}
-                error={!!errors.cookTime}
-                helperText={errors.cookTime}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-            
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Servings"
-                type="number"
-                value={formData.servings}
-                onChange={handleChange('servings')}
-                error={!!errors.servings}
-                helperText={errors.servings}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-            
-            <Grid item xs={6}>
-              <FormControl fullWidth>
-                <InputLabel>Difficulty</InputLabel>
-                <Select
-                  value={formData.difficulty}
-                  onChange={handleChange('difficulty')}
-                  label="Difficulty"
-                >
-                  {difficulties.map(diff => (
-                    <MenuItem key={diff} value={diff}>
-                      {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Box display="flex" sx={{ gap: 1 }}>
+                <TextField
+                  fullWidth
+                  label="Servings"
+                  type="number"
+                  value={formData.servings}
+                  onChange={handleChange('servings')}
+                  error={!!errors.servings}
+                  helperText={errors.servings}
+                  inputProps={{ min: 1 }}
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>Difficulty</InputLabel>
+                  <Select
+                    value={formData.difficulty}
+                    onChange={handleChange('difficulty')}
+                    label="Difficulty"
+                  >
+                    {difficulties.map(diff => (
+                      <MenuItem key={diff} value={diff}>
+                        {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
             </Grid>
             
             {/* Tags */}
