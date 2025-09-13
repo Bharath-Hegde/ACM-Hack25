@@ -6,7 +6,7 @@ export const mealPlanSchema = {
     // Structure: { [dayOfWeek]: { [mealType]: { recipe, status, notes } } }
     // dayOfWeek: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
     // mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
-    // status: 'planned' | 'cooked' | 'eaten_out' | 'skipped'
+    // status: 'planned' | 'cooked' | 'eaten_out' | 'skip'
   },
   createdAt: 'timestamp',
   updatedAt: 'timestamp'
@@ -33,10 +33,8 @@ export const MEAL_TYPES = [
 
 // Meal statuses
 export const MEAL_STATUSES = {
-  PLANNED: 'planned',
-  COOKED: 'cooked',
   EATEN_OUT: 'eaten_out',
-  SKIPPED: 'skipped'
+  SKIP: 'skip'
 };
 
 // Helper functions
@@ -67,20 +65,16 @@ export const formatMealType = (mealType) => {
 
 export const getMealStatusColor = (status) => {
   const colors = {
-    [MEAL_STATUSES.PLANNED]: 'grey',
-    [MEAL_STATUSES.COOKED]: 'green',
-    [MEAL_STATUSES.EATEN_OUT]: 'orange',
-    [MEAL_STATUSES.SKIPPED]: 'red'
+    [MEAL_STATUSES.EATEN_OUT]: 'warning',
+    [MEAL_STATUSES.SKIP]: 'error'
   };
-  return colors[status] || 'grey';
+  return colors[status] || 'default';
 };
 
 export const getMealStatusIcon = (status) => {
   const icons = {
-    [MEAL_STATUSES.PLANNED]: '📋',
-    [MEAL_STATUSES.COOKED]: '✅',
     [MEAL_STATUSES.EATEN_OUT]: '🍽️',
-    [MEAL_STATUSES.SKIPPED]: '❌'
+    [MEAL_STATUSES.SKIP]: '❌'
   };
   return icons[status] || '📋';
 };
@@ -94,7 +88,7 @@ export const createEmptyMealPlan = (weekStartDate) => {
     MEAL_TYPES.forEach(mealType => {
       meals[day][mealType] = {
         recipe: null,
-        status: MEAL_STATUSES.PLANNED,
+        status: null,
         notes: '',
         plannedAt: null,
         completedAt: null
@@ -103,8 +97,7 @@ export const createEmptyMealPlan = (weekStartDate) => {
   });
 
   return {
-    id: `mealplan_${weekStartDate.getTime()}`,
-    weekStartDate,
+    weekStartDate: weekStartDate.toISOString().split('T')[0], // Store as string for consistent querying
     meals,
     createdAt: new Date(),
     updatedAt: new Date()
@@ -131,7 +124,7 @@ export const countMealsByStatus = (mealPlan) => {
     [MEAL_STATUSES.PLANNED]: 0,
     [MEAL_STATUSES.COOKED]: 0,
     [MEAL_STATUSES.EATEN_OUT]: 0,
-    [MEAL_STATUSES.SKIPPED]: 0
+    [MEAL_STATUSES.SKIP]: 0
   };
 
   DAYS_OF_WEEK.forEach(day => {
@@ -215,6 +208,30 @@ sampleMealPlan.meals.wednesday.dinner = {
   },
   status: MEAL_STATUSES.PLANNED,
   notes: 'Family dinner',
+  plannedAt: new Date(),
+  completedAt: null
+};
+
+sampleMealPlan.meals.thursday.lunch = {
+  recipe: {
+    id: '4',
+    name: 'Classic Beef Tacos',
+    imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
+  },
+  status: MEAL_STATUSES.PLANNED,
+  notes: 'Taco Tuesday',
+  plannedAt: new Date(),
+  completedAt: null
+};
+
+sampleMealPlan.meals.friday.dinner = {
+  recipe: {
+    id: '5',
+    name: 'Creamy Mushroom Risotto',
+    imageUrl: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400'
+  },
+  status: MEAL_STATUSES.PLANNED,
+  notes: 'Friday night dinner',
   plannedAt: new Date(),
   completedAt: null
 };

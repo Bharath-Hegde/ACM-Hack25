@@ -1,9 +1,16 @@
-import { Typography, Box, Fab } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Typography, Box, Fab, Button } from '@mui/material';
+import { Add, Refresh } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useRecipes } from '../context/RecipeContext';
+import { collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { sampleRecipes } from '../utils/recipeSchema';
 import RecipeList from '../components/RecipeList';
+import AddRecipeDialog from '../components/AddRecipeDialog';
 
 const Recipes = () => {
+  const navigate = useNavigate();
   const {
     recipes,
     loading,
@@ -14,14 +21,16 @@ const Recipes = () => {
     setFilterTags,
     sortBy,
     setSortBy,
-    getFilteredRecipes
+    getFilteredRecipes,
+    addRecipe
   } = useRecipes();
+
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const filteredRecipes = getFilteredRecipes();
 
   const handleViewDetails = (recipe) => {
-    console.log('View recipe details:', recipe);
-    // TODO: Open recipe detail modal/page
+    navigate(`/recipes/${recipe.id}`);
   };
 
   const handleAddToMealPlan = (recipe) => {
@@ -30,24 +39,56 @@ const Recipes = () => {
   };
 
   const handleAddRecipe = () => {
-    console.log('Add new recipe');
-    // TODO: Open add recipe modal/page
+    setAddDialogOpen(true);
+  };
+
+  const handlePopulateSampleRecipes = async () => {
+    try {
+      // Clear existing recipes first
+      const recipesSnapshot = await getDocs(collection(db, 'recipes'));
+      const deletePromises = recipesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      
+      // Add sample recipes
+      const addedRecipes = [];
+      for (const recipe of sampleRecipes) {
+        const docRef = await addDoc(collection(db, 'recipes'), recipe);
+        addedRecipes.push({ id: docRef.id, ...recipe });
+      }
+      
+      console.log('Sample recipes populated:', addedRecipes.length);
+      // Reload recipes
+      loadRecipes();
+    } catch (error) {
+      console.error('Error populating sample recipes:', error);
+    }
+  };
+
+  const handleAddRecipeSubmit = async (recipeData) => {
+    try {
+      await addRecipe(recipeData);
+      console.log('Recipe added successfully!');
+    } catch (error) {
+      console.error('Error adding recipe:', error);
+      // TODO: Show error toast/notification
+    }
   };
 
   return (
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
           Recipes
         </Typography>
-        <Fab 
-          color="primary" 
-          aria-label="add recipe"
-          onClick={handleAddRecipe}
-          size="medium"
+        <Button
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handlePopulateSampleRecipes}
+          size="small"
+          sx={{ mr: 1 }}
         >
-          <Add />
-        </Fab>
+          Add Sample Recipes
+        </Button>
       </Box>
 
       <RecipeList
@@ -63,6 +104,28 @@ const Recipes = () => {
         onViewDetails={handleViewDetails}
         onAddToMealPlan={handleAddToMealPlan}
       />
+
+      {/* Add Recipe Dialog */}
+      <AddRecipeDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSubmit={handleAddRecipeSubmit}
+      />
+
+      {/* Floating Add Button */}
+      <Fab 
+        color="primary" 
+        aria-label="add recipe"
+        onClick={handleAddRecipe}
+        sx={{ 
+          position: 'fixed', 
+          bottom: 80, // Above bottom navigation
+          right: 16,
+          zIndex: 1000
+        }}
+      >
+        <Add />
+      </Fab>
     </Box>
   );
 };

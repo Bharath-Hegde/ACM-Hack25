@@ -95,38 +95,48 @@ export const RecipeProvider = ({ children }) => {
       // If no recipes in database, add sample recipes
       if (recipes.length === 0) {
         console.log('No recipes found, adding sample recipes...');
+        const addedRecipes = [];
         for (const recipe of sampleRecipes) {
           const docRef = await addDoc(collection(db, 'recipes'), recipe);
           console.log('Added recipe:', docRef.id);
+          addedRecipes.push({ id: docRef.id, ...recipe });
         }
         console.log('Sample recipes added, dispatching...');
-        dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
+        dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: addedRecipes });
       } else {
         console.log('Recipes found, dispatching...');
         dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: recipes });
       }
     } catch (error) {
-      console.error('Error loading recipes:', error);
-      dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: error.message });
+      console.error('Error loading recipes from Firebase:', error);
+      console.log('Falling back to sample recipes...');
+      // Fallback to sample recipes if Firebase fails
+      dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
+      dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: `Firebase error: ${error.message}. Using sample recipes.` });
     }
   };
 
   // Add new recipe
   const addRecipe = async (recipeData) => {
     try {
-      // For now, just add to local state (skip Firebase)
-      const newRecipe = { 
-        id: Date.now().toString(), // Simple ID generation
+      const newRecipeData = {
         ...recipeData,
         createdAt: new Date(),
         updatedAt: new Date()
       };
       
+      // Add to Firebase
+      const docRef = await addDoc(collection(db, 'recipes'), newRecipeData);
+      const newRecipe = { 
+        id: docRef.id,
+        ...newRecipeData
+      };
+      
       dispatch({ type: RECIPE_ACTIONS.ADD_RECIPE, payload: newRecipe });
-      console.log('Recipe added locally:', newRecipe);
+      console.log('Recipe added to Firebase:', newRecipe);
       return newRecipe;
     } catch (error) {
-      console.error('Error adding recipe:', error);
+      console.error('Error adding recipe to Firebase:', error);
       dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: error.message });
       throw error;
     }
@@ -136,16 +146,19 @@ export const RecipeProvider = ({ children }) => {
   const updateRecipe = async (recipeId, recipeData) => {
     try {
       const recipeRef = doc(db, 'recipes', recipeId);
-      await updateDoc(recipeRef, {
+      const updateData = {
         ...recipeData,
         updatedAt: new Date()
-      });
+      };
       
-      const updatedRecipe = { id: recipeId, ...recipeData };
+      await updateDoc(recipeRef, updateData);
+      
+      const updatedRecipe = { id: recipeId, ...updateData };
       dispatch({ type: RECIPE_ACTIONS.UPDATE_RECIPE, payload: updatedRecipe });
+      console.log('Recipe updated in Firebase:', updatedRecipe);
       return updatedRecipe;
     } catch (error) {
-      console.error('Error updating recipe:', error);
+      console.error('Error updating recipe in Firebase:', error);
       dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: error.message });
       throw error;
     }
@@ -156,8 +169,9 @@ export const RecipeProvider = ({ children }) => {
     try {
       await deleteDoc(doc(db, 'recipes', recipeId));
       dispatch({ type: RECIPE_ACTIONS.DELETE_RECIPE, payload: recipeId });
+      console.log('Recipe deleted from Firebase:', recipeId);
     } catch (error) {
-      console.error('Error deleting recipe:', error);
+      console.error('Error deleting recipe from Firebase:', error);
       dispatch({ type: RECIPE_ACTIONS.SET_ERROR, payload: error.message });
       throw error;
     }
@@ -221,13 +235,8 @@ export const RecipeProvider = ({ children }) => {
 
   // Load recipes on mount
   useEffect(() => {
-    // Show sample recipes immediately for better UX
-    console.log('Showing sample recipes immediately...');
-    dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
-    dispatch({ type: RECIPE_ACTIONS.SET_LOADING, payload: false });
-    
-    // Skip Firebase for now due to connection issues
-    // loadRecipes();
+    // Load recipes from Firebase
+    loadRecipes();
   }, []);
 
   const value = {

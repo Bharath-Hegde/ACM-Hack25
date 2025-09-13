@@ -200,9 +200,14 @@ export const GroceryListProvider = ({ children }) => {
   };
 
   // Generate grocery list from meal plan
-  const generateFromMealPlan = (mealPlan) => {
+  const generateFromMealPlan = (mealPlan, recipes = []) => {
     try {
-      const items = generateGroceryListFromMealPlan(mealPlan);
+      console.log('Generating grocery list from meal plan:', mealPlan);
+      console.log('Available recipes:', recipes);
+      
+      const items = generateGroceryListFromMealPlan(mealPlan, recipes);
+      console.log('Generated items:', items);
+      
       const newList = {
         id: `grocery_${Date.now()}`,
         name: 'Weekly Groceries',
@@ -316,10 +321,21 @@ export const GroceryListProvider = ({ children }) => {
   // Load grocery list on mount  
   useEffect(() => {
     try {
-      console.log('Loading sample grocery list...');
-      console.log('Sample data:', sampleGroceryList);
-      console.log('Sample items count:', sampleGroceryList.items.length);
-      dispatch({ type: GROCERY_ACTIONS.SET_GROCERY_LIST, payload: sampleGroceryList });
+      // Comment out sample data to test auto-population
+      // console.log('Loading sample grocery list...');
+      // console.log('Sample data:', sampleGroceryList);
+      // console.log('Sample items count:', sampleGroceryList.items.length);
+      // dispatch({ type: GROCERY_ACTIONS.SET_GROCERY_LIST, payload: sampleGroceryList });
+      
+      // Start with empty grocery list
+      const emptyList = {
+        id: 'grocery_empty',
+        name: 'Weekly Groceries',
+        items: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      dispatch({ type: GROCERY_ACTIONS.SET_GROCERY_LIST, payload: emptyList });
     } catch (error) {
       console.error('Error in useEffect:', error);
     }

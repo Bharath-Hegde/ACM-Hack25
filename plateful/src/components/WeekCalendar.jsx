@@ -5,8 +5,7 @@ import {
   CardContent, 
   IconButton, 
   Chip,
-  Button,
-  Grid
+  Button
 } from '@mui/material';
 import { 
   ChevronLeft, 
@@ -21,7 +20,8 @@ import {
   formatDayName, 
   formatMealType, 
   getMealStatusColor, 
-  getMealStatusIcon 
+  getMealStatusIcon,
+  MEAL_STATUSES
 } from '../utils/mealPlanSchema';
 import RecipeIcon from './RecipeIcon';
 
@@ -54,27 +54,38 @@ const WeekCalendar = ({
     });
   };
 
-  const getMealStatusChip = (meal) => {
-    if (!meal || !meal.recipe) {
+  const getMealDisplay = (meal) => {
+    if (!meal || (!meal.recipe && !meal.status)) {
       return (
-        <Chip
-          label="Empty"
-          size="small"
-          variant="outlined"
-          sx={{ fontSize: '0.7rem', height: 20 }}
-        />
+        <Typography variant="caption" color="text.secondary">
+          Tap to add meal
+        </Typography>
       );
     }
 
-    return (
-      <Chip
-        label={meal.status}
-        size="small"
-        color={getMealStatusColor(meal.status)}
-        icon={<span>{getMealStatusIcon(meal.status)}</span>}
-        sx={{ fontSize: '0.7rem', height: 20 }}
-      />
-    );
+    if (meal.recipe) {
+      return (
+        <RecipeIcon recipe={meal.recipe} />
+      );
+    }
+
+    if (meal.status) {
+      return (
+        <Box>
+          <Typography variant="caption" noWrap sx={{ display: 'block', mb: 0.5 }}>
+            {meal.status === MEAL_STATUSES.EATEN_OUT ? '🍽️ Eat Out' : '❌ Skip'}
+          </Typography>
+          <Chip
+            label={meal.status === MEAL_STATUSES.EATEN_OUT ? 'Eat Out' : 'Skip'}
+            size="small"
+            color={getMealStatusColor(meal.status)}
+            sx={{ fontSize: '0.7rem', height: 20 }}
+          />
+        </Box>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -99,21 +110,24 @@ const WeekCalendar = ({
         </IconButton>
       </Box>
 
-      {/* Week Calendar Grid */}
-      <Grid container spacing={1} direction='column'>
+      {/* Week Calendar - One tile per row */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {weekDates.map((date, index) => {
           const dayOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index];
           const dayMeals = mealPlan?.meals?.[dayOfWeek] || {};
           const isToday = date.toDateString() === new Date().toDateString();
 
           return (
-            <Grid item xs={12} sm={6} md={4} lg={1.7} key={dayOfWeek}>
+            <Box key={dayOfWeek} sx={{ width: '100%' }}>
               <Card 
                 sx={{ 
-                  height: '100%',
+                  minHeight: 200,
+                  width: '100%',
+                  maxWidth: '100%',
                   border: isToday ? '2px solid' : '1px solid',
                   borderColor: isToday ? 'primary.main' : 'divider',
-                  backgroundColor: isToday ? 'primary.50' : 'background.paper'
+                  backgroundColor: isToday ? 'primary.50' : 'background.paper',
+                  boxSizing: 'border-box'
                 }}
               >
                 <CardContent sx={{ p: 1.5 }}>
@@ -131,7 +145,7 @@ const WeekCalendar = ({
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     {MEAL_TYPES.map(mealType => {
                       const meal = dayMeals[mealType];
-                      const hasRecipe = meal && meal.recipe;
+                      const hasContent = meal && (meal.recipe || meal.status);
 
                       return (
                         <Box 
@@ -139,12 +153,12 @@ const WeekCalendar = ({
                           sx={{ 
                             p: 1, 
                             border: '1px solid',
-                            borderColor: hasRecipe ? 'primary.main' : 'divider',
+                            borderColor: hasContent ? 'primary.main' : 'divider',
                             borderRadius: 1,
-                            backgroundColor: hasRecipe ? 'primary.50' : 'transparent',
+                            backgroundColor: hasContent ? 'primary.50' : 'transparent',
                             cursor: 'pointer',
                             '&:hover': {
-                              backgroundColor: hasRecipe ? 'primary.100' : 'action.hover'
+                              backgroundColor: hasContent ? 'primary.100' : 'action.hover'
                             }
                           }}
                           onClick={() => onMealClick(dayOfWeek, mealType, meal)}
@@ -153,42 +167,19 @@ const WeekCalendar = ({
                             <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
                               {formatMealType(mealType)}
                             </Typography>
-                            {hasRecipe && (
-                              <IconButton 
-                                size="small" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onMealStatusChange(dayOfWeek, mealType, meal.status);
-                                }}
-                                sx={{ p: 0.5 }}
-                              >
-                                {meal.status === 'planned' ? <Restaurant /> : 
-                                 meal.status === 'cooked' ? <CheckCircle /> :
-                                 meal.status === 'eaten_out' ? <RestaurantMenu /> : <Close />}
-                              </IconButton>
-                            )}
                           </Box>
 
-                          {hasRecipe ? (
-                            <Box>
-                              <RecipeIcon recipe={meal.recipe} />
-                              {getMealStatusChip(meal)}
-                            </Box>
-                          ) : (
-                            <Typography variant="caption" color="text.secondary">
-                              Tap to add meal
-                            </Typography>
-                          )}
+                          {getMealDisplay(meal)}
                         </Box>
                       );
                     })}
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           );
         })}
-      </Grid>
+      </Box>
     </Box>
   );
 };
