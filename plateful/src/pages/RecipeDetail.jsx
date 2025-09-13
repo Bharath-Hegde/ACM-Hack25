@@ -201,19 +201,21 @@ const RecipeDetail = () => {
       </Box>
 
       {/* Recipe Image */}
-      <Card sx={{ mb: 3, width: '100%', maxWidth: '100%' }}>
-        <CardMedia
-          component="img"
-          height="250"
-          image={recipe.imageUrl}
-          alt={recipe.name}
-          sx={{ 
-            objectFit: 'cover',
-            width: '100%',
-            maxWidth: '100%'
-          }}
-        />
-      </Card>
+      {recipe.imageUrl && recipe.imageUrl != "" &&
+        (<Card sx={{ mb: 3, width: '100%', maxWidth: '100%' }}>
+          <CardMedia
+            component="img"
+            height="250"
+            image={recipe.imageUrl}
+            alt={recipe.name}
+            sx={{ 
+              objectFit: 'cover',
+              width: '100%',
+              maxWidth: '100%'
+            }}
+          />
+        </Card>)
+      }
 
       {/* Recipe Description */}
       <Paper sx={{ p: 2, mb: 3 }}>
@@ -224,20 +226,6 @@ const RecipeDetail = () => {
 
       {/* Recipe Info Cards */}
       <Grid container spacing={2} sx={{ mb: 3, width: '100%', maxWidth: '100%' }}>
-        <Grid item xs={6} sm={3}>
-          <Card sx={{ textAlign: 'center', p: 1, width: '100%' }}>
-            <CardContent sx={{ p: 1 }}>
-              <AccessTime color="primary" />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {formatTime(totalTime)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Total Time
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 1, width: '100%' }}>
             <CardContent sx={{ p: 1 }}>
@@ -255,7 +243,7 @@ const RecipeDetail = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 1, width: '100%' }}>
             <CardContent sx={{ p: 1 }}>
-              <Restaurant color="primary" />
+              <AccessTime color="primary" />
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                 {recipe.prepTime}m
               </Typography>
@@ -269,11 +257,26 @@ const RecipeDetail = () => {
         <Grid item xs={6} sm={3}>
           <Card sx={{ textAlign: 'center', p: 1, width: '100%' }}>
             <CardContent sx={{ p: 1 }}>
+              <AccessTime color="primary" />
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                 {recipe.cookTime}m
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Cook Time
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={3}>
+          <Card sx={{ textAlign: 'center', p: 1, width: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <AccessTime color="primary" />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                {formatTime(totalTime)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Total Time
               </Typography>
             </CardContent>
           </Card>
