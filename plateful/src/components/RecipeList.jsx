@@ -138,7 +138,7 @@ const RecipeList = ({
       ) : (
         <Grid container spacing={2}>
           {recipes.map((recipe) => (
-            <Grid item xs={6} sm={4} key={recipe.id}>
+            <Grid item xs={6} sm={4} key={recipe.id} width="100%">
               <RecipeCard
                 recipe={recipe}
                 onViewDetails={onViewDetails}
