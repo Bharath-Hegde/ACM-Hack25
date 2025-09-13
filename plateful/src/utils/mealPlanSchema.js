@@ -211,3 +211,27 @@ sampleMealPlan.meals.wednesday.dinner = {
   plannedAt: new Date(),
   completedAt: null
 };
+
+sampleMealPlan.meals.thursday.lunch = {
+  recipe: {
+    id: '4',
+    name: 'Classic Beef Tacos',
+    imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'
+  },
+  status: MEAL_STATUSES.PLANNED,
+  notes: 'Taco Tuesday',
+  plannedAt: new Date(),
+  completedAt: null
+};
+
+sampleMealPlan.meals.friday.dinner = {
+  recipe: {
+    id: '5',
+    name: 'Creamy Mushroom Risotto',
+    imageUrl: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400'
+  },
+  status: MEAL_STATUSES.PLANNED,
+  notes: 'Friday night dinner',
+  plannedAt: new Date(),
+  completedAt: null
+};

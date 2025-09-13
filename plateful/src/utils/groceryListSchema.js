@@ -181,41 +181,68 @@ export const parseIngredientQuantity = (ingredient) => {
   return { quantity, unit, name };
 };
 
-export const generateGroceryListFromMealPlan = (mealPlan) => {
+export const generateGroceryListFromMealPlan = (mealPlan, recipes = []) => {
   const items = [];
   const itemMap = new Map(); // To aggregate duplicate items
+  
+  // Create a map of recipe ID to full recipe details
+  const recipeMap = new Map();
+  recipes.forEach(recipe => {
+    recipeMap.set(recipe.id, recipe);
+  });
   
   // Process each day's meals
   Object.values(mealPlan.meals).forEach(dayMeals => {
     Object.values(dayMeals).forEach(meal => {
-      if (meal.recipe && meal.recipe.ingredients) {
-        meal.recipe.ingredients.forEach(ingredient => {
-          const { quantity, unit, name } = parseIngredientQuantity(ingredient);
-          const category = categorizeIngredient(name);
-          const itemKey = `${name}_${unit}`;
-          
-          if (itemMap.has(itemKey)) {
-            // Aggregate quantities
-            const existingItem = itemMap.get(itemKey);
-            existingItem.quantity += quantity;
-          } else {
-            // Create new item
-            const newItem = {
-              id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name,
-              category,
-              quantity,
-              unit,
-              purchased: false,
-              notes: '',
-              source: 'meal_plan',
-              sourceId: mealPlan.id,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            };
-            itemMap.set(itemKey, newItem);
-          }
-        });
+      if (meal.recipe && meal.recipe.id) {
+        // Get full recipe details
+        const fullRecipe = recipeMap.get(meal.recipe.id);
+        if (fullRecipe && fullRecipe.ingredients) {
+          fullRecipe.ingredients.forEach(ingredient => {
+            // Handle both string and object ingredient formats
+            let quantity, unit, name;
+            
+            if (typeof ingredient === 'string') {
+              // Parse string format: "2 cups flour"
+              const parsed = parseIngredientQuantity(ingredient);
+              quantity = parsed.quantity;
+              unit = parsed.unit;
+              name = parsed.name;
+            } else if (typeof ingredient === 'object' && ingredient.name) {
+              // Handle object format: { name: "flour", amount: 2, unit: "cups" }
+              quantity = ingredient.amount || 1;
+              unit = ingredient.unit || 'pieces';
+              name = ingredient.name;
+            } else {
+              return; // Skip invalid ingredients
+            }
+            
+            const category = categorizeIngredient(name);
+            const itemKey = `${name.toLowerCase()}_${unit}`;
+            
+            if (itemMap.has(itemKey)) {
+              // Aggregate quantities
+              const existingItem = itemMap.get(itemKey);
+              existingItem.quantity += quantity;
+            } else {
+              // Create new item
+              const newItem = {
+                id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+                category,
+                quantity,
+                unit,
+                purchased: false,
+                notes: `From ${fullRecipe.name}`,
+                source: 'meal_plan',
+                sourceId: mealPlan.id,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              };
+              itemMap.set(itemKey, newItem);
+            }
+          });
+        }
       }
     });
   });
