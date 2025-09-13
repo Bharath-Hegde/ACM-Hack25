@@ -19,13 +19,15 @@ const RecipeCard = ({ recipe, onViewDetails, onAddToMealPlan }) => {
         }
       }}
     >
-      <CardMedia
-        component="img"
-        height="140"
-        image={recipe.imageUrl}
-        alt={recipe.name}
-        sx={{ objectFit: 'cover' }}
-      />
+      {recipe.imageUrl && recipe.imageUrl != "" &&
+        (<CardMedia
+          component="img"
+          height="140"
+          image={recipe.imageUrl}
+          alt={recipe.name}
+          sx={{ objectFit: 'cover' }}
+        />)
+      }
       
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="subtitle1" component="h2" noWrap>
