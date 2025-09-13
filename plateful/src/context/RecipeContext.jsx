@@ -79,22 +79,30 @@ export const RecipeProvider = ({ children }) => {
   // Load recipes from Firebase
   const loadRecipes = async () => {
     try {
+      console.log('Starting to load recipes...');
       dispatch({ type: RECIPE_ACTIONS.SET_LOADING, payload: true });
       
       const recipesSnapshot = await getDocs(collection(db, 'recipes'));
+      console.log('Firebase query completed, docs:', recipesSnapshot.docs.length);
+      
       const recipes = recipesSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       
+      console.log('Recipes from Firebase:', recipes);
+      
       // If no recipes in database, add sample recipes
       if (recipes.length === 0) {
         console.log('No recipes found, adding sample recipes...');
         for (const recipe of sampleRecipes) {
-          await addDoc(collection(db, 'recipes'), recipe);
+          const docRef = await addDoc(collection(db, 'recipes'), recipe);
+          console.log('Added recipe:', docRef.id);
         }
+        console.log('Sample recipes added, dispatching...');
         dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
       } else {
+        console.log('Recipes found, dispatching...');
         dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: recipes });
       }
     } catch (error) {
@@ -106,14 +114,16 @@ export const RecipeProvider = ({ children }) => {
   // Add new recipe
   const addRecipe = async (recipeData) => {
     try {
-      const docRef = await addDoc(collection(db, 'recipes'), {
+      // For now, just add to local state (skip Firebase)
+      const newRecipe = { 
+        id: Date.now().toString(), // Simple ID generation
         ...recipeData,
         createdAt: new Date(),
         updatedAt: new Date()
-      });
+      };
       
-      const newRecipe = { id: docRef.id, ...recipeData };
       dispatch({ type: RECIPE_ACTIONS.ADD_RECIPE, payload: newRecipe });
+      console.log('Recipe added locally:', newRecipe);
       return newRecipe;
     } catch (error) {
       console.error('Error adding recipe:', error);
@@ -211,7 +221,13 @@ export const RecipeProvider = ({ children }) => {
 
   // Load recipes on mount
   useEffect(() => {
-    loadRecipes();
+    // Show sample recipes immediately for better UX
+    console.log('Showing sample recipes immediately...');
+    dispatch({ type: RECIPE_ACTIONS.SET_RECIPES, payload: sampleRecipes });
+    dispatch({ type: RECIPE_ACTIONS.SET_LOADING, payload: false });
+    
+    // Skip Firebase for now due to connection issues
+    // loadRecipes();
   }, []);
 
   const value = {
