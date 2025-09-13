@@ -110,7 +110,7 @@ const WeekCalendar = ({
           <ChevronLeft />
         </IconButton>
         
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'black' }}>
           {formatDate(selectedWeek)} - {formatDate(weekDates[6])}
         </Typography>
         

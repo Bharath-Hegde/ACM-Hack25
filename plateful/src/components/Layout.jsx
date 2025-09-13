@@ -32,7 +32,6 @@ const Layout = ({ children }) => {
         backgroundColor: 'primary.main', 
         color: 'white',
         textAlign: 'center',
-        width: '100%',
         maxWidth: '100%'
       }}>
         <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
