@@ -61,6 +61,7 @@ const groceryReducer = (state, action) => {
       const newItem = {
         id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         ...action.payload,
+        sourceRecipes: action.payload.sourceRecipes || [], // Ensure sourceRecipes exists
         createdAt: new Date(),
         updatedAt: new Date()
       };

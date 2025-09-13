@@ -157,31 +157,49 @@ const GroceryList = ({
                     
                     {/* Item Info */}
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: item.purchased ? 'normal' : 'bold',
-                          textDecoration: item.purchased ? 'line-through' : 'none',
-                          color: item.purchased ? 'text.secondary' : 'text.primary'
-                        }}
-                      >
-                        {item.name}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'black' }}>
                           {formatQuantity(item.quantity, item.unit)}
                         </Typography>
-                        
-                        {item.notes && (
-                          <>
-                            <Divider orientation="vertical" flexItem />
-                            <Typography variant="caption" color="text.secondary">
-                              {item.notes}
-                            </Typography>
-                          </>
-                        )}
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            fontWeight: item.purchased ? 'normal' : 'bold',
+                            textDecoration: item.purchased ? 'line-through' : 'none',
+                            color: item.purchased ? 'text.secondary' : 'text.primary'
+                          }}
+                        >
+                          {item.name}
+                        </Typography>
                       </Box>
+                      
+                      {/* Recipe Tags */}
+                      {item.sourceRecipes && item.sourceRecipes.length > 0 && (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                          {item.sourceRecipes.map((recipeName, index) => (
+                            <Chip
+                              key={index}
+                              label={recipeName}
+                              size="small"
+                              variant="outlined"
+                              sx={{ 
+                                fontSize: '0.65rem',
+                                height: '20px',
+                                '& .MuiChip-label': {
+                                  px: 0.5
+                                }
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      )}
+                      
+                      {/* Notes */}
+                      {item.notes && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                          {item.notes}
+                        </Typography>
+                      )}
                     </Box>
                     
                     {/* Action Buttons */}

@@ -13,6 +13,7 @@ export const groceryListSchema = {
       notes: 'string',
       source: 'string', // 'meal_plan' | 'manual' | 'recipe'
       sourceId: 'string', // ID of the meal plan or recipe
+      sourceRecipes: ['string'], // Array of recipe names that this item comes from
       createdAt: 'timestamp',
       updatedAt: 'timestamp'
     }
@@ -222,9 +223,13 @@ export const generateGroceryListFromMealPlan = (mealPlan, recipes = []) => {
             const itemKey = `${name.toLowerCase()}_${unit}`;
             
             if (itemMap.has(itemKey)) {
-              // Aggregate quantities
+              // Aggregate quantities and add recipe to source list
               const existingItem = itemMap.get(itemKey);
               existingItem.quantity += quantity;
+              // Add recipe name to sourceRecipes if not already present
+              if (!existingItem.sourceRecipes.includes(fullRecipe.name)) {
+                existingItem.sourceRecipes.push(fullRecipe.name);
+              }
             } else {
               // Create new item
               const newItem = {
@@ -234,9 +239,10 @@ export const generateGroceryListFromMealPlan = (mealPlan, recipes = []) => {
                 quantity,
                 unit,
                 purchased: false,
-                notes: `From ${fullRecipe.name}`,
+                notes: '', // Remove the "From recipe" text since we'll show tags
                 source: 'meal_plan',
                 sourceId: mealPlan.id,
+                sourceRecipes: [fullRecipe.name], // Array of recipe names
                 createdAt: new Date(),
                 updatedAt: new Date()
               };
@@ -296,6 +302,7 @@ export const sampleGroceryList = {
       notes: 'Fresh baby spinach',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Mediterranean Salad'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -309,6 +316,7 @@ export const sampleGroceryList = {
       notes: 'Roma tomatoes',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Mediterranean Salad', 'Pasta Primavera'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -322,6 +330,7 @@ export const sampleGroceryList = {
       notes: 'Yellow onions',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Pasta Primavera'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -335,6 +344,7 @@ export const sampleGroceryList = {
       notes: 'Hass avocados',
       source: 'manual',
       sourceId: '',
+      sourceRecipes: [],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -348,6 +358,7 @@ export const sampleGroceryList = {
       notes: 'Red, yellow, green mix',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Stir Fry'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -363,6 +374,7 @@ export const sampleGroceryList = {
       notes: 'Organic preferred',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Chicken Stir Fry', 'Grilled Chicken'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -376,6 +388,7 @@ export const sampleGroceryList = {
       notes: 'Lean ground turkey',
       source: 'meal_plan',
       sourceId: 'mealplan_1',
+      sourceRecipes: ['Turkey Meatballs'],
       createdAt: new Date(),
       updatedAt: new Date()
     },
