@@ -23,6 +23,7 @@ import {
   getMealStatusColor, 
   getMealStatusIcon 
 } from '../utils/mealPlanSchema';
+import RecipeIcon from './RecipeIcon';
 
 const WeekCalendar = ({ 
   mealPlan, 
@@ -170,9 +171,7 @@ const WeekCalendar = ({
 
                           {hasRecipe ? (
                             <Box>
-                              <Typography variant="caption" noWrap sx={{ display: 'block', mb: 0.5 }}>
-                                {meal.recipe.name}
-                              </Typography>
+                              <RecipeIcon recipe={meal.recipe} />
                               {getMealStatusChip(meal)}
                             </Box>
                           ) : (
