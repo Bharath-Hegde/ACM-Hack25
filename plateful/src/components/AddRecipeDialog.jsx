@@ -392,53 +392,63 @@ const AddRecipeDialog = ({ open, onClose, onSubmit }) => {
             {formData.ingredients.map((ingredient, index) => (
               <Grid item xs={12} key={index}>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                  <TextField
-                    label="Ingredient Name"
-                    value={ingredient.name}
-                    onChange={handleIngredientChange(index, 'name')}
-                    sx={{ flexGrow: 1 }}
-                    placeholder="e.g., Olive Oil"
-                  />
-                  <TextField
-                    label="Amount"
-                    type="number"
-                    value={ingredient.amount}
-                    onChange={handleIngredientChange(index, 'amount')}
-                    sx={{ width: 100 }}
-                    inputProps={{ min: 0.1, step: 0.1 }}
-                  />
-                  <FormControl sx={{ width: 120 }}>
-                    <InputLabel>Unit</InputLabel>
-                    <Select
-                      value={ingredient.unit}
-                      onChange={handleIngredientChange(index, 'unit')}
-                      label="Unit"
-                    >
-                      {units.map(unit => (
-                        <MenuItem key={unit} value={unit}>
-                          {unit}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl sx={{ width: 120 }}>
-                    <InputLabel>Category</InputLabel>
-                    <Select
-                      value={ingredient.category}
-                      onChange={handleIngredientChange(index, 'category')}
-                      label="Category"
-                    >
-                      {categories.map(category => (
-                        <MenuItem key={category} value={category}>
-                          {category}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <IconButton 
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <TextField
+                        label="Ingredient Name"
+                        value={ingredient.name}
+                        onChange={handleIngredientChange(index, 'name')}
+                        sx={{ flexGrow: 1 }}
+                        placeholder="e.g., Olive Oil"
+                      />
+
+                      <FormControl sx={{ width: 150 }}>
+                        <InputLabel>Category</InputLabel>
+                        <Select
+                          value={ingredient.category}
+                          onChange={handleIngredientChange(index, 'category')}
+                          label="Category"
+                        >
+                          {categories.map(category => (
+                            <MenuItem key={category} value={category}>
+                              {category}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <TextField
+                        label="Amount"
+                        type="number"
+                        value={ingredient.amount}
+                        onChange={handleIngredientChange(index, 'amount')}
+                        sx={{ width: 100, flexGrow: 1 }}
+                        inputProps={{ min: 0.1, step: 0.1 }}
+                      />
+
+                      <FormControl sx={{ width: 120, flexGrow: 1 }}>
+                        <InputLabel>Unit</InputLabel>
+                        <Select
+                          value={ingredient.unit}
+                          onChange={handleIngredientChange(index, 'unit')}
+                          label="Unit"
+                        >
+                          {units.map(unit => (
+                            <MenuItem key={unit} value={unit}>
+                              {unit}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+
+                  <IconButton
                     onClick={() => removeIngredient(index)}
                     disabled={formData.ingredients.length === 1}
                     color="error"
+                    sx={{ margin: 'auto' }}
                   >
                     <Delete />
                   </IconButton>
