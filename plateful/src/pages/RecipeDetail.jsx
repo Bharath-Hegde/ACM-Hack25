@@ -247,9 +247,20 @@ const RecipeDetail = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={3} sx={{ width: '100%', maxWidth: '100%' }}>
+      {/* Ingredients and Instructions - Using Flexbox instead of Grid */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' }, 
+        gap: 3, 
+        width: '100%',
+        maxWidth: '100%'
+      }}>
         {/* Ingredients */}
-        <Grid item xs={12} md={6}>
+        <Box sx={{ 
+          flex: 1, 
+          minWidth: 0, // Prevents flex item from shrinking below content size
+          width: { xs: '100%', md: '50%' }
+        }}>
           <Card sx={{ width: '100%', height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -267,10 +278,14 @@ const RecipeDetail = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
         {/* Instructions */}
-        <Grid item xs={12} md={6}>
+        <Box sx={{ 
+          flex: 1, 
+          minWidth: 0, // Prevents flex item from shrinking below content size
+          width: { xs: '100%', md: '50%' }
+        }}>
           <Card sx={{ width: '100%', height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -304,8 +319,8 @@ const RecipeDetail = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Nutrition Information */}
       {recipe.nutrition && (
