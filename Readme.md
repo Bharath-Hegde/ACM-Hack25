@@ -2,6 +2,10 @@
 
 Smart meal planning, effortless grocery shopping, healthier you.
 
+
+https://github.com/user-attachments/assets/948d8ecb-e0de-42dc-8d23-7932bc39b3fd
+
+
 ---
 
 ## **Problems We Are Solving**
