@@ -20,7 +20,7 @@ Smart meal planning, effortless grocery shopping, healthier you.
 
 ## **Our Solution**
 
-We have designed a mobile app **Plateful** which provides a unified solution to these problems by integrating a catalogue of recipes, weekly and daily meal planning INTO automated generation of grocery lists. You will never have to worry about what you need to eat for the day or go through the pain of making grocery lists, while at the same time you can track your personal health and nutrition goals with the help of our insights feature which will keep track of how many times you cooked meals and how many proteins or calories you consumed.
+We have designed a mobile app **Plateful** which provides a unified solution to these problems by integrating a catalogue of recipes, AI-powered meal planning, and automated grocery list generation. Our intelligent AI assistant creates personalized weekly meal plans based on your dietary preferences, cuisine choices, and eating habits, eliminating the tedious manual planning process. You will never have to worry about what you need to eat for the day or go through the pain of making grocery lists, while at the same time you can track your personal health and nutrition goals with the help of our insights feature which will keep track of how many times you cooked meals and how many proteins or calories you consumed.
 
 ---
 
@@ -34,6 +34,8 @@ We have designed a mobile app **Plateful** which provides a unified solution to 
 
 ### **Meal Planning**
 - **Weekly Calendar**: Visual weekly meal planner with breakfast, lunch, and dinner slots for each day
+- **AI-Powered Planning**: Let AI automatically generate your weekly meal plan based on your dietary preferences, cuisine preferences, and eating habits
+- **Smart Preferences**: Set dietary restrictions (vegetarian, vegan, gluten-free), preferred cuisines, meal complexity, and eat-out frequency
 - **Flexible Assignment**: Assign recipes to specific meals or mark meals as "eat out" or "skip"
 - **Week Navigation**: Easily switch between different weeks to plan ahead or review past meals
 - **Meal Status Tracking**: Track whether you cooked at home or ate out for each meal
