@@ -129,19 +129,13 @@ export const MealPlanProvider = ({ children }) => {
       
       let mealPlan;
       if (querySnapshot.empty) {
-        // For testing purposes, use sample data for all weeks
-        // In production, you would create empty meal plans
-        console.log(`[${callId}] ➕ Using sample meal plan for week:`, weekStartString);
-        const sampleMealPlanCopy = { ...sampleMealPlan };
-        sampleMealPlanCopy.weekStartDate = weekStartString;
-        sampleMealPlanCopy.id = `sample_${weekStartString}`;
-        mealPlan = sampleMealPlanCopy;
+        // Create empty meal plan for new weeks
+        console.log(`[${callId}] ➕ Creating empty meal plan for week:`, weekStartString);
+        const newMealPlan = createEmptyMealPlan(weekStartDate);
+        const docRef = await addDoc(collection(db, 'mealPlans'), newMealPlan);
+        mealPlan = { ...newMealPlan, id: docRef.id };
+        console.log(`[${callId}] ✅ Created new empty meal plan:`, mealPlan.id);
         dispatch({ type: MEAL_PLAN_ACTIONS.SET_MEAL_PLAN, payload: mealPlan });
-        
-        // TODO: In production, create empty meal plan and save to Firebase
-        // const newMealPlan = createEmptyMealPlan(weekStartDate);
-        // const docRef = await addDoc(collection(db, 'mealPlans'), newMealPlan);
-        // mealPlan = { ...newMealPlan, id: docRef.id };
       } else {
         // Use the first (and should be only) meal plan for this week
         const mealPlanDoc = querySnapshot.docs[0];
@@ -268,6 +262,56 @@ export const MealPlanProvider = ({ children }) => {
     dispatch({ type: MEAL_PLAN_ACTIONS.SET_SELECTED_MEAL_TYPE, payload: mealType });
   };
 
+  // Auto-populate meal plan with AI suggestions
+  const autoPopulateMealPlan = async (aiMealPlan) => {
+    try {
+      console.log('🔄 Auto-populating meal plan with AI suggestions...');
+      console.log('📅 Current meal plan ID:', state.currentMealPlan?.id);
+      console.log('📅 Current week:', state.currentMealPlan?.weekStartDate);
+      
+      if (!state.currentMealPlan || !state.currentMealPlan.id) {
+        console.error('❌ No current meal plan to update');
+        return;
+      }
+
+      const mealPlanRef = doc(db, 'mealPlans', state.currentMealPlan.id);
+      const updates = {};
+
+      console.log('🍽️ AI Meal Plan to populate:');
+      console.log(aiMealPlan);
+
+      // Build the update object for Firebase
+      Object.keys(aiMealPlan).forEach(dayOfWeek => {
+        Object.keys(aiMealPlan[dayOfWeek]).forEach(mealType => {
+          const mealData = aiMealPlan[dayOfWeek][mealType];
+          updates[`meals.${dayOfWeek}.${mealType}`] = mealData;
+          
+          console.log(`📝 Updating ${dayOfWeek} ${mealType}:`, mealData);
+          
+          // Also update local state
+          dispatch({ 
+            type: MEAL_PLAN_ACTIONS.UPDATE_MEAL, 
+            payload: { dayOfWeek, mealType, mealData } 
+          });
+        });
+      });
+
+      // Add updated timestamp
+      updates.updatedAt = new Date();
+
+      console.log('💾 Firebase updates object:', updates);
+
+      // Update Firebase
+      await updateDoc(mealPlanRef, updates);
+      
+      console.log('✅ Meal plan auto-populated successfully!');
+    } catch (error) {
+      console.error('❌ Error auto-populating meal plan:', error);
+      dispatch({ type: MEAL_PLAN_ACTIONS.SET_ERROR, payload: error.message });
+      throw error;
+    }
+  };
+
   // Get meals for a specific day
   const getDayMeals = (dayOfWeek) => {
     return state.currentMealPlan?.meals?.[dayOfWeek] || {};
@@ -297,6 +341,7 @@ export const MealPlanProvider = ({ children }) => {
     removeRecipeFromMeal,
     markMealAsEatOut,
     markMealAsSkip,
+    autoPopulateMealPlan,
     setSelectedWeek,
     setSelectedDay,
     setSelectedMealType,

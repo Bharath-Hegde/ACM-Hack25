@@ -1,10 +1,12 @@
-import { Typography, Box, Fab } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Typography, Box, Fab, Button } from '@mui/material';
+import { Add, SmartToy } from '@mui/icons-material';
 import { useState } from 'react';
 import { useMealPlan } from '../context/MealPlanContext';
 import { useRecipes } from '../context/RecipeContext';
+import { generateMealPlan, isApiKeyAvailable } from '../services/claudeService';
 import WeekCalendar from '../components/WeekCalendar';
 import MealSelectionDialog from '../components/MealSelectionDialog';
+import AIMealPlanningDialog from '../components/AIMealPlanningDialog';
 
 const MealPlanner = () => {
   const {
@@ -17,6 +19,7 @@ const MealPlanner = () => {
     clearMeal,
     markMealAsEatOut,
     markMealAsSkip,
+    autoPopulateMealPlan,
     getDayMeals
   } = useMealPlan();
 
@@ -27,6 +30,10 @@ const MealPlanner = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedMealType, setSelectedMealType] = useState(null);
   const [currentMeal, setCurrentMeal] = useState(null);
+  
+  // AI Meal Planning state
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
 
   const handleMealClick = (dayOfWeek, mealType, meal) => {
     setSelectedDay(dayOfWeek);
@@ -71,6 +78,42 @@ const MealPlanner = () => {
     setCurrentMeal(null);
   };
 
+  const handleAIGenerateMealPlan = async (preferences) => {
+    setIsGeneratingMealPlan(true);
+    try {
+      console.log('🚀 Starting AI meal plan generation...');
+      console.log('👤 User preferences:', preferences);
+      console.log('📚 Available recipes count:', recipes.length);
+      console.log('📅 Selected week:', selectedWeek);
+      
+      // Check if API key is available
+      if (!isApiKeyAvailable()) {
+        console.log('❌ API key not found in .env file');
+        throw new Error('Claude API key not found. Please add VITE_CLAUDE_API_KEY to your .env file');
+      } else {
+        console.log('✅ API key loaded from .env file');
+      }
+      
+      // Generate meal plan using Claude API
+      console.log('🤖 Calling Claude API...');
+      const aiMealPlan = await generateMealPlan(preferences, recipes);
+      
+      // Auto-populate the current meal plan with AI suggestions
+      console.log('📝 Auto-populating meal plan...');
+      await autoPopulateMealPlan(aiMealPlan);
+      
+      // Close the dialog
+      setAiDialogOpen(false);
+      
+      console.log('🎉 Meal plan generated and populated successfully!');
+    } catch (error) {
+      console.error('❌ Error generating meal plan:', error);
+      alert(`Error generating meal plan: ${error.message}`);
+    } finally {
+      setIsGeneratingMealPlan(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -89,9 +132,24 @@ const MealPlanner = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-        Meal Planner
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+          Meal Planner
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<SmartToy />}
+          onClick={() => setAiDialogOpen(true)}
+          sx={{ 
+            backgroundColor: 'secondary.main',
+            '&:hover': {
+              backgroundColor: 'secondary.dark',
+            }
+          }}
+        >
+          AI Meal Planning
+        </Button>
+      </Box>
 
       <WeekCalendar
         mealPlan={currentMealPlan}
@@ -113,6 +171,16 @@ const MealPlanner = () => {
         dayOfWeek={selectedDay}
         mealType={selectedMealType}
         currentMeal={currentMeal}
+      />
+
+      {/* AI Meal Planning Dialog */}
+      <AIMealPlanningDialog
+        open={aiDialogOpen}
+        onClose={() => setAiDialogOpen(false)}
+        onGenerateMealPlan={handleAIGenerateMealPlan}
+        recipes={recipes}
+        isLoading={isGeneratingMealPlan}
+        selectedWeek={selectedWeek}
       />
 
       {/* Floating Add Button */}
