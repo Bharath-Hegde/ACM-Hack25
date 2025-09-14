@@ -52,3 +52,65 @@ We have designed a mobile app **Plateful** which provides a unified solution to 
 - **Nutrition Tracking**: Monitor calories, protein, carbs, and other macronutrients across your meal plans
 - **Weekly Summaries**: Get comprehensive insights into your eating habits and nutritional intake
 - **Progress Visualization**: Visual charts and graphs showing your meal planning and nutrition trends
+
+---
+
+## **Getting Started**
+
+### **Prerequisites**
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project (for data persistence)
+- Claude API key (for AI meal planning)
+
+### **Local Development Setup**
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ACM-Hack25/plateful
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the `plateful` directory:
+   ```bash
+   VITE_CLAUDE_API_KEY=your_claude_api_key_here
+   ```
+
+4. **Start the development servers**
+   
+   **Terminal 1 - Backend Server (for AI features):**
+   ```bash
+   node server.js
+   ```
+   You should see: `🚀 Claude API proxy server running on http://localhost:3001`
+   
+   **Terminal 2 - Frontend Application:**
+   ```bash
+   npm run dev
+   ```
+   You should see: `➜ Local: http://localhost:5174/`
+
+5. **Open the application**
+   Navigate to `http://localhost:5174/` in your browser
+
+### **Demo Mode**
+If you don't have a Claude API key, you can still test the AI meal planning feature by enabling demo mode. The app will generate realistic meal plans based on your preferences without requiring API calls.
+
+**To enable demo mode:**
+1. Open `src/services/claudeService.js`
+2. Set `const DEMO_MODE = true;`
+3. The AI meal planning will work with simulated responses
+
+This allows you to experience the full AI meal planning workflow without needing API credentials.
+
+### **Features to Test**
+- **AI Meal Planning**: Click "AI Meal Planning" button in the Meal Planner section
+- **Recipe Management**: Add, edit, and browse recipes
+- **Grocery Lists**: Auto-generate shopping lists from meal plans
+- **Insights**: View nutrition and meal pattern analytics
